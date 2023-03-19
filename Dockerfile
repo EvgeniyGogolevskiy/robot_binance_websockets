@@ -15,7 +15,7 @@ COPY . /robot_binance_websockets
 WORKDIR /robot_binance_websockets
 
 # Установка модулей для Python3
-RUN pip3 install --upgrade pip==21.1.2 && pip3 install -r requirements.txt
+RUN pip3 install -r requirements.txt
 
 # Запуск через /bin/bash необходим для поддержки переменных окружения
 CMD ["/bin/bash", "-c", "python", "test_class8_with_average.py"]
