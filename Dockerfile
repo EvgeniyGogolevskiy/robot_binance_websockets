@@ -19,4 +19,4 @@ RUN pip install --upgrade pip
 RUN pip install -r requirements.txt
 
 # Запуск через /bin/bash необходим для поддержки переменных окружения
-CMD ["/bin/bash", "-c", "python", "test_class8_with_average.py"]
+CMD ["/bin/bash", "-c", "python test_class8_with_average.py "]
