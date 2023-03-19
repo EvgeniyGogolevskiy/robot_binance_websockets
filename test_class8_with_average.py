@@ -10,11 +10,13 @@ from config import api, secret
 from create_order import buy_order, sell_order, buy_order_average, sell_order_average
 from find_volatily_pairs import top_volatily
 import logging
+import sys
 import warnings
 
 warnings.simplefilter(action='ignore', category=FutureWarning)
 
 CLIENT = Client(api, secret)
+logging.basicConfig(stream=sys.stdout)
 logger = logging.getLogger('mylogger')
 logger.setLevel(logging.INFO)
 
