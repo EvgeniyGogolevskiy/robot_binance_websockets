@@ -119,7 +119,7 @@ if __name__ == '__main__':
         for pair in top_volatily():
             adp = Strategy(pair, '1m', 1000000000, 50)
             asyncio.ensure_future(adp.main())
-        logger.info(f'start {datetime.now}')
+        logger.info(f'start {datetime.now()}')
         loop.run_forever()
     except KeyboardInterrupt:
         pass
