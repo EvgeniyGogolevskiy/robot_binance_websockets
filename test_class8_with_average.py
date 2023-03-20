@@ -62,7 +62,7 @@ class Strategy:
                         vol10 = float(data_5m_volume[9]) - float(data_5m_volume_buy[9])
                         list_vol = [vol1, vol2, vol3, vol4, vol5, vol6, vol7, vol8, vol9, vol10]
                         self.q_max = max(list_vol)
-                        self.q = statistics.mean(list_vol) * 2
+                        self.q = statistics.mean(list_vol) * 2.5
 
                         data_5m_hight = data_5m_hight[1:] + [float(data['k']['h'])]
                         data_5m_low = data_5m_low[1:] + [float(data['k']['l'])]
