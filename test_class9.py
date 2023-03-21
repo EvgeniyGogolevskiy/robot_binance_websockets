@@ -55,7 +55,7 @@ class Strategy:
                         for i in range(len(data_5m_hight)):
                             list_diff.append(float(data_5m_hight[i]) - float(data_5m_low[i]) * 100 / float(data_5m_hight[i]))
                         self.average_diff = statistics.mean(list_diff)
-                        min10 = min(data_5m_low)
+                        min10 = min(list(map(float, data_5m_low)))
 
                         data_rsi = data_rsi[1:29].append(pd.Series([float(data['k']['c'])]))
 
