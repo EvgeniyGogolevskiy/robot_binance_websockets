@@ -40,6 +40,7 @@ class Strategy:
                 while not position:
                     data = json.loads(await client.recv())
                     data_rsi[29] = float(data['k']['c'])
+                    now_vol_diff = float(data['k']['Q']) - (float(data['k']['q']) - float(data['k']['Q']))
                     rsi = list(ta.rsi(data_rsi, length=2))[-1]
                     if data['k']['x']:
 
@@ -54,7 +55,7 @@ class Strategy:
 
                         await asyncio.sleep(0.5)
                         # logger.info(event_time, '  ', self.pair, '  ', data_rsi, rsi)
-                    if 0 < list_volume_diff[-3] < list_volume_diff[-2] < list_volume_diff[-1] < float(data['k']['Q']):
+                    if 0 < list_volume_diff[-3] < list_volume_diff[-2] < list_volume_diff[-1] < now_vol_diff:
                         price_buy = float(data['k']['c'])
                         buy_order(self.pair, self.depo, price_buy)
                         price_take = price_buy * 1.003
