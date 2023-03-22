@@ -54,11 +54,11 @@ class Strategy:
 
                         await asyncio.sleep(0.5)
                         # logger.info(event_time, '  ', self.pair, '  ', data_rsi, rsi)
-                    if  0 < list_volume_diff[-1] * 2 < (float(data['k']['q']) - float(data['k']['Q'])) * 2 < now_vol_diff and rsi < 60:
+                    if  0 < list_volume_diff[-1] * 2.5 < (float(data['k']['q']) - float(data['k']['Q'])) * 2.5 < now_vol_diff and rsi < 60:
                         price_buy = float(data['k']['c'])
                         buy_order(self.pair, self.depo, price_buy)
-                        price_take = price_buy * (1 + hight_low["average_diff"] * 0.01)
-                        price_stop = price_buy * (1 - hight_low["average_diff"] * 0.005)
+                        price_take = price_buy * (1 + hight_low["average_diff"] * 0.05)
+                        price_stop = price_buy * (1 - hight_low["average_diff"] * 0.01)
                         #price_stop = min(hight_low['min10'] * 0.998, price_buy * 0.994)
                         logger.info(f'{datetime.now()}, {self.pair} цена = {data["k"]["c"]}, ({now_vol_diff / (float(data["k"]["q"]) - float(data["k"]["Q"]))}), average_diff {round(hight_low["average_diff"], 2)} rsi = {round(rsi, 2)}')
                         position = True
@@ -82,7 +82,7 @@ if __name__ == '__main__':
     loop = asyncio.get_event_loop()
     try:
         for pair in top_volatily():
-            adp = Strategy(pair, '1m', 1000000000, 30)
+            adp = Strategy(pair, '5m', 1000000000, 20)
             asyncio.ensure_future(adp.main())
         logger.info(f'start {datetime.now()}')
         loop.run_forever()
