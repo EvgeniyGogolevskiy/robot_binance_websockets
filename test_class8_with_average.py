@@ -103,12 +103,12 @@ class Strategy:
                         self.q = 1000000000
                     if price_stop < float(data['k']['c']) <= price_average and not flag_average:
                         buy_order_average(self.pair, self.depo, price_buy)
-                        logger.info(f'{self.pair}, "AVERAGE", {data["k"]["c"]}, {datetime.now()}')
+                        logger.info(f'{self.pair}, AVERAGE, {data["k"]["c"]}, {datetime.now()}')
                         price_take = (float(data['k']['c']) + price_buy) / 2 * 1.0045
                         flag_average = True
                     if float(data['k']['c']) <= price_stop:
                         sell_order_average(self.pair, self.depo, price_buy)
-                        logger.info(f'{self.pair}, "STOP_LOSS", {data["k"]["c"]}, {datetime.now()}')
+                        logger.info(f'{self.pair}, STOP_LOSS, {data["k"]["c"]}, {datetime.now()}')
                         position = False
                         self.q = 1000000000
 
