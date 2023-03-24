@@ -6,7 +6,6 @@ from binance.client import Client
 import pandas as pd
 import pandas_ta as ta
 from config import api, secret
-from calculate_size_lot import size_lot
 import warnings
 warnings.simplefilter(action='ignore', category=FutureWarning)
 

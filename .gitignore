@@ -1,3 +1,8 @@
 __pycache__
 .idea
-config.py
+main.py
+oo.py
+task.py
+task_number1.py
+test.py
+test1_corr.py

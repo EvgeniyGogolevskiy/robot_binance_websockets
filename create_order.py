@@ -36,30 +36,7 @@ def buy_order(pair, depo, price_buy):
             time.sleep(0.1)
 
 
-def buy_order_average(pair, depo, price_buy):
-    lot = size_lot(depo, price_buy) * 2
-    while True:
-        try:
-            CLIENT.futures_create_order(symbol=pair, side='BUY', type='MARKET', quantity=lot)
-            break
-        except Exception as error:
-            print(f' {datetime.now}, {pair}, {error}')
-            time.sleep(0.1)
-
-
-def sell_order(pair, depo, price_buy):
-    lot = size_lot(depo, price_buy)
-    while True:
-        try:
-            CLIENT.futures_create_order(symbol=pair, side='SELL', type='MARKET', quantity=lot)
-            break
-        except Exception as error:
-            print(f' {datetime.now}, {pair}, {error}')
-            time.sleep(0.1)
-
-
-def sell_order_average(pair, depo, price_buy):
-    lot = size_lot(depo, price_buy) * 3
+def sell_order(pair, lot):
     while True:
         try:
             CLIENT.futures_create_order(symbol=pair, side='SELL', type='MARKET', quantity=lot)

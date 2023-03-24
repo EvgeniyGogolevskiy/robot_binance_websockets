@@ -32,7 +32,6 @@ class Strategy:
         list_volume_diff = calculate_volume_first(self.data_5m)
         hight_low = calculate_diff_first(self.data_5m)
         data_rsi = self.data_5m[4][:30].astype(float)
-        count_average = 1
         position = False
         url = f'wss://fstream.binance.com/ws/{self.pair.lower()}@kline_{self.interval}'
         async with websockets.connect(url) as client:
@@ -57,8 +56,8 @@ class Strategy:
                         # logger.info(event_time, '  ', self.pair, '  ', data_rsi, rsi)
                     if  list_volume_diff[-4] < list_volume_diff[-3] < list_volume_diff[-2] < 0 < list_volume_diff[-1] < now_vol_diff and rsi < 40:
                         price_buy = float(data['k']['c'])
-                        buy_order(self.pair, self.dollars_for_order, price_buy)
-                        price_take = price_buy * 1.0015
+                        a = buy_order(self.pair, self.dollars_for_order, price_buy)
+                        price_take = price_buy * 1.0025
                         price_average = price_buy * (1 - hight_low["average_diff"] * 0.02)
                         #price_stop = min(hight_low['min10'] * 0.998, price_buy * 0.994)
                         logger.info(f'{datetime.now()}, {self.pair} цена = {data["k"]["c"]}, average_diff {round(hight_low["average_diff"], 2)} rsi = {round(rsi, 2)}')
@@ -70,14 +69,13 @@ class Strategy:
                         hight_low = calculate_diff(data, hight_low['list_diff'], hight_low['data_5m_low'])
                         data_rsi = data_rsi[1:29].append(pd.Series([float(data['k']['c'])]))
                     if float(data['k']['c']) >= price_take:
-                        sell_order(self.pair, self.dollars_for_order * count_average, price_buy)
+                        sell_order(self.pair, a['amt'])
                         logger.info(f'{datetime.now()}, {self.pair}, {data["k"]["c"]}, ---------------TAKE_PROFIT---------------)')
                         position = False
                     if float(data['k']['c']) <= price_average:
-                        count_average += 1
                         a = buy_order(self.pair, self.dollars_for_order, price_buy)
                         price_average = price_average * (1 - hight_low["average_diff"] * 0.02)
-                        price_take = a['entry_price'] * 0.001
+                        price_take = a['entry_price'] * 0.0025
                         logger.info(f'{datetime.now()}, {self.pair}, {data["k"]["c"]}, _______________AVERAGE, sum = {a["amt"] * price_average}_______________ ')
 
 
