@@ -45,6 +45,7 @@ class Strategy:
 
                         """"""" Расчёт объёма """""""
                         list_volume_diff = calculate_volume(data, list_volume_diff)
+                        sell_volume = float(data['k']['q']) - float(data['k']['Q'])
 
                         """"""" Расчёт амплитуды"""""""
                         hight_low = calculate_diff(data, hight_low['list_diff'], hight_low['data_5m_low'])
@@ -54,18 +55,20 @@ class Strategy:
 
                         await asyncio.sleep(0.5)
                         # logger.info(event_time, '  ', self.pair, '  ', data_rsi, rsi)
-                    if  list_volume_diff[-4] < list_volume_diff[-3] < list_volume_diff[-2] < 0 < list_volume_diff[-1] < now_vol_diff and rsi < 40:
+                    if  list_volume_diff[-3] < list_volume_diff[-2] < sell_volume * 2 < list_volume_diff[-1] < now_vol_diff and rsi < 40:
                         price_buy = float(data['k']['c'])
                         a = buy_order(self.pair, self.dollars_for_order, price_buy)
-                        price_take = price_buy * 1.0025
-                        price_average = price_buy * (1 - hight_low["average_diff"] * 0.02)
+                        price_take = a['entry_price'] * 1.0025
+                        price_average = a['entry_price'] * (1 - hight_low["average_diff"] * 0.02)
                         #price_stop = min(hight_low['min10'] * 0.998, price_buy * 0.994)
-                        logger.info(f'{datetime.now()}, {self.pair} цена = {data["k"]["c"]}, average_diff {round(hight_low["average_diff"], 2)} rsi = {round(rsi, 2)}')
+                        logger.info(f'{datetime.now()}, {self.pair} цена = {data["k"]["c"]}, {list_volume_diff[-4]} < {list_volume_diff[-3]} < {list_volume_diff[-2]} < {sell_volume} < {list_volume_diff[-1]} < {now_vol_diff},average_diff {round(hight_low["average_diff"], 2)} rsi = {round(rsi, 2)}')
+                        logger.info(f'По паре {self.pair} Открытие: Цена входа {price_buy}, тейк-профит = {price_take}, цена усреднения = {price_average}')
                         position = True
                 while position:
                     data = json.loads(await client.recv())
                     if data['k']['x']:
                         list_volume_diff = calculate_volume(data, list_volume_diff)
+                        sell_volume = float(data['k']['q']) - float(data['k']['Q'])
                         hight_low = calculate_diff(data, hight_low['list_diff'], hight_low['data_5m_low'])
                         data_rsi = data_rsi[1:29].append(pd.Series([float(data['k']['c'])]))
                     if float(data['k']['c']) >= price_take:
@@ -75,8 +78,9 @@ class Strategy:
                     if float(data['k']['c']) <= price_average:
                         a = buy_order(self.pair, self.dollars_for_order, price_buy)
                         price_average = price_average * (1 - hight_low["average_diff"] * 0.02)
-                        price_take = a['entry_price'] * 0.0025
+                        price_take = a['entry_price'] * 1.0025
                         logger.info(f'{datetime.now()}, {self.pair}, {data["k"]["c"]}, _______________AVERAGE, sum = {a["amt"] * price_average}_______________ ')
+                        logger.info(f'По паре {self.pair} Усреднение: Цена входа {a["entry_price"]}, тейк-профит = {price_take}, цена усреднения = {price_average}')
 
 
 if __name__ == '__main__':
