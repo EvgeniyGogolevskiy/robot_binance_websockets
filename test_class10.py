@@ -30,6 +30,7 @@ class Strategy:
 
     async def main(self):
         list_volume_diff = calculate_volume_first(self.data_5m)
+        sell_volume = float(self.data_5m[7][28]) - float(self.data_5m[10][28])
         hight_low = calculate_diff_first(self.data_5m)
         data_rsi = self.data_5m[4][:30].astype(float)
         position = False
@@ -54,8 +55,8 @@ class Strategy:
                         data_rsi = data_rsi[1:29].append(pd.Series([float(data['k']['c'])]))
 
                         await asyncio.sleep(0.5)
-                        # logger.info(event_time, '  ', self.pair, '  ', data_rsi, rsi)
-                    if  list_volume_diff[-3] < list_volume_diff[-2] < sell_volume * 2 < list_volume_diff[-1] < now_vol_diff and rsi < 40:
+
+                    if  list_volume_diff[-3] < list_volume_diff[-2] < sell_volume < list_volume_diff[-1] < now_vol_diff and rsi < 40:
                         price_buy = float(data['k']['c'])
                         a = buy_order(self.pair, self.dollars_for_order, price_buy)
                         price_take = a['entry_price'] * 1.0025
