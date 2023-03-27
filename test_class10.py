@@ -40,7 +40,7 @@ class Strategy:
                     data = json.loads(await client.recv())
                     data_rsi[29] = float(data['k']['c'])
                     now_vol_diff = float(data['k']['Q']) - (float(data['k']['q']) - float(data['k']['Q']))
-                    rsi = list(ta.rsi(data_rsi, length=2))[-1]
+                    rsi = list(ta.rsi(data_rsi, length=5))[-1]
                     if data['k']['x']:
 
                         """"""" Расчёт объёма """""""
@@ -54,7 +54,7 @@ class Strategy:
 
                         await asyncio.sleep(0.5)
 
-                    if  list_volume_diff[-5] < list_volume_diff[-4] < list_volume_diff[-3] < list_volume_diff[-2] < list_volume_diff[-1] < now_vol_diff and hight_low["average_diff"] > 0.15 and rsi < 60:
+                    if  abs(list_volume_diff[-1]) * 10 < now_vol_diff and hight_low["average_diff"] > 0.15 and rsi < 90:
                         price_buy = float(data['k']['c'])
                         a = buy_order(self.pair, self.dollars_for_order, price_buy)
                         price_take = a['entry_price'] * 1.0025
@@ -67,7 +67,6 @@ class Strategy:
                     data = json.loads(await client.recv())
                     if data['k']['x']:
                         list_volume_diff = calculate_volume(data, list_volume_diff)
-                        sell_volume = float(data['k']['q']) - float(data['k']['Q'])
                         hight_low = calculate_diff(data, hight_low['list_diff'], hight_low['data_5m_low'])
                         data_rsi = data_rsi[1:29].append(pd.Series([float(data['k']['c'])]))
                     if float(data['k']['c']) >= price_take:
@@ -86,7 +85,7 @@ if __name__ == '__main__':
     loop = asyncio.get_event_loop()
     try:
         for pair in top_volatily():
-            adp = Strategy(pair, '1m', 100)
+            adp = Strategy(pair, '1m', 50)
             asyncio.ensure_future(adp.main())
         logger.info(f'start {datetime.now()}')
         loop.run_forever()
