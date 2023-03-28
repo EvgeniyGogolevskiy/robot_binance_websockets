@@ -54,13 +54,13 @@ class Strategy:
 
                         await asyncio.sleep(0.5)
 
-                    if  abs(list_volume_diff[-1]) * 10 < now_vol_diff and hight_low["average_diff"] > 0.15 and rsi < 90:
+                    if  abs(list_volume_diff[-1]) * 20 < now_vol_diff and hight_low["average_diff"] > 0.15 and rsi < 90:
                         price_buy = float(data['k']['c'])
                         a = buy_order(self.pair, self.dollars_for_order, price_buy)
                         price_take = a['entry_price'] * 1.0025
                         price_average = a['entry_price'] * (1 - hight_low["average_diff"] * 0.02)
                         #price_stop = min(hight_low['min10'] * 0.998, price_buy * 0.994)
-                        logger.info(f'{datetime.now()}, {self.pair} цена = {data["k"]["c"]}, {list_volume_diff[-5]} < {list_volume_diff[-4]} < {list_volume_diff[-3]} < {list_volume_diff[-2]} < {list_volume_diff[-1]} < {now_vol_diff}, average_diff {round(hight_low["average_diff"], 2)} rsi = {round(rsi, 2)}')
+                        logger.info(f'{datetime.now()}, {self.pair} цена = {data["k"]["c"]}, {list_volume_diff[-1]}*20 < {now_vol_diff}, average_diff {round(hight_low["average_diff"], 2)} rsi = {round(rsi, 2)}')
                         logger.info(f'По паре {self.pair} Открытие: Цена входа {price_buy}, тейк-профит = {price_take}, цена усреднения = {price_average}')
                         position = True
                 while position:
