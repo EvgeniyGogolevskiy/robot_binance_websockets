@@ -1,7 +1,7 @@
 import statistics
 
 
-def calculate_volume_first(data_5m):
+def calculate_volume_diff_first(data_5m):
     data_5m_volume_buy = list(data_5m[10][19:29])
     data_5m_volume = list(data_5m[7][19:29])
     list_volume_diff = []
@@ -12,7 +12,7 @@ def calculate_volume_first(data_5m):
     return list_volume_diff
 
 
-def calculate_volume(data, list_volume_diff):
+def calculate_diff_volume(data, list_volume_diff):
     volume_sell = float(data['k']['q']) - float(data['k']['Q'])
     volume_diff = float(data['k']['Q']) - volume_sell
     list_volume_diff = list_volume_diff[1:] + [volume_diff]
