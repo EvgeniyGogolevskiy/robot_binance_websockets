@@ -42,7 +42,7 @@ class Strategy:
                     data = json.loads(await client.recv())
                     data_rsi[29] = float(data['k']['c'])
                     now_vol_diff = float(data['k']['Q']) - (float(data['k']['q']) - float(data['k']['Q']))
-                    rsi = list(ta.rsi(data_rsi, length=5))[-1]
+                    rsi = list(ta.rsi(data_rsi, length=2))[-1]
                     if data['k']['x']:
 
                         """"""" Расчёт объёма """""""
@@ -57,12 +57,12 @@ class Strategy:
 
                         await asyncio.sleep(0.5)
 
-                    if float(data['k']['q']) > average_volume * 3 and now_vol_diff < float(data['k']['Q']) * -3 and hight_low["average_diff"] > 0.2:
+                    if float(data['k']['q']) > average_volume * 3 and now_vol_diff < float(data['k']['Q']) * -3 and hight_low["average_diff"] > 0.15 and rsi < 2:
                         price_buy = float(data['k']['c'])
                         a = buy_order(self.pair, self.dollars_for_order, price_buy)
-                        price_take = a['entry_price'] * 1.0025
-                        price_stop= a['entry_price'] * (1 - hight_low["average_diff"] * 0.02)
-                        logger.info(f'{datetime.now()}, {self.pair} цена = {data["k"]["c"]}, {float(data["k"]["q"])} > {average_volume} and {now_vol_diff} < {float(data["k"]["Q"]) * -3} ,  average_diff {round(hight_low["average_diff"], 2)} rsi = {round(rsi, 2)}')
+                        price_take = a['entry_price'] * 1.0065
+                        price_stop= a['entry_price'] * (1 - hight_low["average_diff"] * 0.01)
+                        logger.info(f'{datetime.now()}, {self.pair} цена = {data["k"]["c"]}, {float(data["k"]["q"])} > {average_volume * 3} and {now_vol_diff} < {float(data["k"]["Q"]) * -3} ,  average_diff {round(hight_low["average_diff"], 2)} rsi = {round(rsi, 2)}')
                         logger.info(f'По паре {self.pair} Открытие: Цена входа {price_buy}, тейк-профит = {price_take}, цена стоп-лосса = {price_stop}')
                         position = True
                 while position:

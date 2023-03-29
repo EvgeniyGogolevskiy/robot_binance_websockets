@@ -5,10 +5,45 @@ import time
 CLIENT = Client()
 
 
-def top_volatily():
-    list_top_pairs_volatily = []
+def analise_volume():
     all_pairs = pd.DataFrame(CLIENT.futures_exchange_info()['symbols'])[['pair', 'quoteAsset']]
     pairs = all_pairs.pair.dropna().unique()
+
+    print("Count all pair market:", len(pairs))
+    list_pair_volume = []
+
+    LIST_IGNORE_PAIR = ['BTCUSDT',
+                        'ETHUSDT',
+                        'BNBUSDT',
+                        'BTCBUSD',
+                        'ETHBUSD',
+                        'BNBBUSD',
+                        'SOLBUSD']
+
+    for cripto_pair in pairs:
+        if cripto_pair in LIST_IGNORE_PAIR:
+            continue
+        time.sleep(0.2)
+
+        try:
+            data = pd.DataFrame(CLIENT.futures_klines(symbol=cripto_pair, interval='30m', limit=24))
+            volume_pair = data[7].astype(float).sum()
+            list_pair_volume.append((cripto_pair, volume_pair))
+        except Exception as error:
+            print(error)
+            continue
+    if len(list_pair_volume) != 0:
+        sorted_list_pair_volume = sorted(list_pair_volume, key=lambda volume: volume[1], reverse=True)
+        fix_pecent_list_pair = sorted_list_pair_volume[:int((len(list_pair_volume) * 30) / 100)]
+        fix_pecent_list_pair = [pair[0] for pair in fix_pecent_list_pair]
+        return fix_pecent_list_pair
+    else:
+        return None
+
+
+def top_volatily():
+    list_top_pairs_volatily = []
+    pairs = analise_volume()
 
     for pair in pairs:
         try:
@@ -30,4 +65,5 @@ def top_volatily():
     top = []
     for i in range(len(list_top_pairs_volatily)):
         top.append(list_top_pairs_volatily[i][0])
+    print(top)
     return top
