@@ -59,18 +59,20 @@ class Strategy:
 
                         await asyncio.sleep(0.5)
 
-                    if float(data['k']['q']) > average_volume * 3 and now_vol_diff < float(data['k']['Q']) * -3 and hight_low["average_diff"] > 0.15 and rsi < 2:
+                    if float(data['k']['q']) > average_volume * 4 and now_vol_diff < float(data['k']['Q']) * -4 and hight_low["average_diff"] > 0.15 and rsi < 1:
                         price_buy = float(data['k']['c'])
                         a = buy_order(self.pair, self.dollars_for_order, price_buy)
-                        price_take = a['entry_price'] * 1.012
-                        price_stop= a['entry_price'] * (1 - hight_low["average_diff"] * 0.02)
-                        price_for_traling_stop = a['entry_price'] * 1.002
-                        logger.info(f'{str(datetime.now())[8:19]}, {self.pair} цена {data["k"]["c"]}, {round(float(data["k"]["q"]), 1)} > {round(average_volume * 3, 1)} and {round(now_vol_diff, 1)} < {round(float(data["k"]["Q"]) * -3, 1)}, av_diff {round(hight_low["average_diff"], 2)} rsi = {round(rsi, 2)}')
+                        price_take = a['entry_price'] * 1.02
+                        price_stop= a['entry_price'] * (1 - hight_low["average_diff"] * 0.04)
+                        price_average = a['entry_price'] * (1 - hight_low["average_diff"] * 0.02)
+                        price_for_traling_stop = a['entry_price'] * 1.004
+                        logger.info(f'{str(datetime.now())[8:19]}, {self.pair} цена {data["k"]["c"]}, {round(float(data["k"]["q"]), 1)} > {round(average_volume * 4, 1)} and {round(now_vol_diff, 1)} < {round(float(data["k"]["Q"]) * -4, 1)}, av_diff {round(hight_low["average_diff"], 2)} rsi = {round(rsi, 2)}')
                         try:
                             bot.send_message(my_id_tg, f"Открылась позиция по паре - {self.pair}")
                         except Exception:
                             logger.info(f'Не отправилось сообщение об открытии сделки по паре {self.pair}')
                         position = True
+                        breakeven = False
                 while position:
                     data = json.loads(await client.recv())
                     if data['k']['x']:
@@ -95,8 +97,16 @@ class Strategy:
                         except Exception:
                             logger.info(f'Не отправилось сообщение о стопе по паре {self.pair}')
                     if price_for_traling_stop <= float(data['k']['c']) < price_take:
+                        if not breakeven:
+                            price_stop = a['entry_price'] * 1.001
+                            breakeven = True
+                        if breakeven:
+                            price_stop *= 1.001
                         price_for_traling_stop *= 1.002
-                        price_stop *= 1.001
+                    if price_stop < float(data['k']['c']) <= price_average:
+                        a = buy_order(self.pair, self.dollars_for_order * 1.5, price_buy)
+                        price_take = a['entry_price'] * 1.01
+                        price_for_traling_stop = a['entry_price'] * 1.003
 
 
 if __name__ == '__main__':
