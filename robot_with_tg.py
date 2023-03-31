@@ -75,6 +75,7 @@ class Strategy:
                                     logger.info(f'Не отправилось сообщение об открытии сделки по паре {self.pair}')
                                 position = True
                                 breakeven = False
+                                average = False
                         while position:
                             data = json.loads(await client.recv())
                             if data['k']['x']:
@@ -105,14 +106,22 @@ class Strategy:
                                 if breakeven:
                                     price_stop *= 1.001
                                 price_for_traling_stop *= 1.002
-                            if price_stop < float(data['k']['c']) <= price_average:
+                            if price_stop < float(data['k']['c']) <= price_average and not average:
                                 a = buy_order(self.pair, self.dollars_for_order * 1.5, price_buy)
                                 price_take = a['entry_price'] * 1.01
                                 price_for_traling_stop = a['entry_price'] * 1.003
+                                average = True
                                 logger.info(f'{datetime.now()}, {self.pair}, {data["k"]["c"]}, _______________AVERAGE_______________ ')
+                                try:
+                                    bot.send_message(my_id_tg, f"Усреднение по паре - {self.pair}")
+                                except Exception:
+                                    logger.info(f'Не отправилось сообщение об усреднении по паре {self.pair}')
             except Exception as error:
                 logger.info(f'{datetime.now()}, {self.pair}, {error}')
-                bot.send_message(my_id_tg, f'{datetime.now()}, {self.pair}, {error}')
+                try:
+                    bot.send_message(my_id_tg, f'{datetime.now()}, {self.pair}, {error}')
+                except Exception:
+                    continue
                 await asyncio.sleep(30)
 
 
