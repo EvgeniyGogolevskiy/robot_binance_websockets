@@ -8,6 +8,7 @@ CLIENT = Client()
 def analise_volume():
     all_pairs = pd.DataFrame(CLIENT.futures_exchange_info()['symbols'])[['pair', 'quoteAsset']]
     pairs = all_pairs.pair.dropna().unique()
+    pairs = pairs[5:]
 
     print("Count all pair market:", len(pairs))
     list_pair_volume = []
@@ -34,7 +35,7 @@ def analise_volume():
             continue
     if len(list_pair_volume) != 0:
         sorted_list_pair_volume = sorted(list_pair_volume, key=lambda volume: volume[1], reverse=True)
-        fix_pecent_list_pair = sorted_list_pair_volume[:int((len(list_pair_volume) * 30) / 100)]
+        fix_pecent_list_pair = sorted_list_pair_volume[:int((len(list_pair_volume) * 25) / 100)]
         fix_pecent_list_pair = [pair[0] for pair in fix_pecent_list_pair]
         return fix_pecent_list_pair
     else:
@@ -61,7 +62,7 @@ def top_volatily():
         time.sleep(0.1)
 
     list_top_pairs_volatily = sorted(list_top_pairs_volatily, key=lambda volume: volume[1], reverse=True)
-    list_top_pairs_volatily = list_top_pairs_volatily[:25]
+    list_top_pairs_volatily = list_top_pairs_volatily[:30]
     top = []
     for i in range(len(list_top_pairs_volatily)):
         top.append(list_top_pairs_volatily[i][0])
