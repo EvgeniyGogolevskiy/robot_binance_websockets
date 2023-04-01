@@ -42,7 +42,7 @@ class Strategy:
                     data = json.loads(await client.recv())
                     data_rsi[29] = float(data['k']['c'])
                     now_vol_diff = float(data['k']['Q']) - (float(data['k']['q']) - float(data['k']['Q']))
-                    rsi = list(ta.rsi(data_rsi, length=2))[-1]
+                    rsi = list(ta.rsi(data_rsi, length=5))[-1]
                     if data['k']['x']:
 
                         """"""" Расчёт объёма """""""
@@ -57,17 +57,15 @@ class Strategy:
 
                         await asyncio.sleep(0.5)
 
-                    if float(data['k']['q']) > average_volume * 3 and now_vol_diff < float(data['k']['Q']) * -3 and hight_low["average_diff"] > 0.15 and rsi < 1:
+                    if float(data['k']['q']) > average_volume * 3 and now_vol_diff < float(data['k']['Q']) * -4 and hight_low["average_diff"] > 0.15 and rsi < 20:
                         price_buy = float(data['k']['c'])
                         a = buy_order(self.pair, self.dollars_for_order, price_buy)
                         price_take = a['entry_price'] * 1.012
-                        price_stop= a['entry_price'] * (1 - hight_low["average_diff"] * 0.05)
-                        price_average = a['entry_price'] * (1 - hight_low["average_diff"] * 0.03)
-                        price_for_traling_stop = a['entry_price'] * 1.003
-                        logger.info(f'{str(datetime.now())[8:19]}, {self.pair} цена {data["k"]["c"]}, {round(float(data["k"]["q"]), 1)} > {round(average_volume * 3, 1)} and {round(now_vol_diff, 1)} < {round(float(data["k"]["Q"]) * -3, 1)}, av_diff {round(hight_low["average_diff"], 2)} rsi = {round(rsi, 2)}')
+                        price_stop= a['entry_price'] * (1 - hight_low["average_diff"] * 0.03)
+                        price_for_traling_stop = a['entry_price'] * (1 + hight_low["average_diff"] * 0.02)
+                        logger.info(f'{str(datetime.now())[8:19]}, {self.pair} цена {data["k"]["c"]}, {round(float(data["k"]["q"]), 1)} > {round(average_volume * 3, 1)} and {round(now_vol_diff, 1)} < {round(float(data["k"]["Q"]) * -4, 1)}, av_diff {round(hight_low["average_diff"], 2)} rsi = {round(rsi, 2)}')
                         position = True
                         breakeven = False
-                        average = False
                 while position:
                     data = json.loads(await client.recv())
                     if data['k']['x']:
@@ -77,32 +75,29 @@ class Strategy:
                         data_rsi = data_rsi[1:29].append(pd.Series([float(data['k']['c'])]))
                     if float(data['k']['c']) >= price_take:
                         sell_order(self.pair, a['amt'])
-                        logger.info(f'{datetime.now()}, {self.pair}, {data["k"]["c"]}, ---------------TAKE_PROFIT---------------)')
+                        logger.info(f'{datetime.now()}, {self.pair}, {data["k"]["c"]}, ---------TAKE_PROFIT---------')
                         position = False
                     if float(data['k']['c']) <= price_stop:
                         sell_order(self.pair, a['amt'])
-                        logger.info(f'{datetime.now()}, {self.pair}, {data["k"]["c"]}, _________STOP_LOSS - безубыток {breakeven}_________ ')
+                        if breakeven:
+                            logger.info(f'{datetime.now()}, {self.pair}, {data["k"]["c"]}, _________BREAKEVEN_________')
+                        if not breakeven:
+                            logger.info(f'{datetime.now()}, {self.pair}, {data["k"]["c"]}, _________STOP_LOSS_________')
                         position = False
                     if price_for_traling_stop <= float(data['k']['c']) < price_take:
                         if not breakeven:
-                            price_stop = a['entry_price'] * 1.001
+                            price_stop = a['entry_price'] * 1.0015
                             breakeven = True
                         if breakeven:
-                            price_stop *= 1.001
-                        price_for_traling_stop *= 1.002
-                    if price_stop < float(data['k']['c']) <= price_average and not average:
-                        a = buy_order(self.pair, self.dollars_for_order * 1.5, price_buy)
-                        price_take = a['entry_price'] * 1.01
-                        price_for_traling_stop = a['entry_price'] * 1.003
-                        average = True
-                        logger.info(f'{datetime.now()}, {self.pair}, {data["k"]["c"]}, _______________AVERAGE_______________ ')
+                            price_stop *= 1.0015
+                        price_for_traling_stop *= 1.0015
 
 
 if __name__ == '__main__':
     loop = asyncio.get_event_loop()
     try:
         for pair in top_volatily():
-            adp = Strategy(pair, '1m', 50)
+            adp = Strategy(pair, '1m', 90)
             asyncio.ensure_future(adp.main())
         logger.info(f'start {datetime.now()}')
         loop.run_forever()
