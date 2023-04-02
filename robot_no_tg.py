@@ -42,7 +42,7 @@ class Strategy:
                     data = json.loads(await client.recv())
                     data_rsi[29] = float(data['k']['c'])
                     now_vol_diff = float(data['k']['Q']) - (float(data['k']['q']) - float(data['k']['Q']))
-                    rsi = list(ta.rsi(data_rsi, length=5))[-1]
+                    rsi = list(ta.rsi(data_rsi, length=2))[-1]
                     if data['k']['x']:
 
                         """"""" Расчёт объёма """""""
@@ -57,12 +57,12 @@ class Strategy:
 
                         await asyncio.sleep(0.5)
 
-                    if float(data['k']['q']) > average_volume * 3 and now_vol_diff < float(data['k']['Q']) * -4 and hight_low["average_diff"] > 0.15 and rsi < 20:
+                    if float(data['k']['q']) > average_volume * 3 and now_vol_diff < float(data['k']['Q']) * -4 and hight_low["average_diff"] > 0.15 and rsi < 1:
                         price_buy = float(data['k']['c'])
                         a = buy_order(self.pair, self.dollars_for_order, price_buy)
                         price_take = a['entry_price'] * 1.012
-                        price_stop= a['entry_price'] * (1 - hight_low["average_diff"] * 0.03)
-                        price_for_traling_stop = a['entry_price'] * (1 + hight_low["average_diff"] * 0.02)
+                        price_stop= a['entry_price'] * (1 - hight_low["average_diff"] * 0.04)
+                        price_for_traling_stop = a['entry_price'] * (1 + hight_low["average_diff"] * 0.03)
                         logger.info(f'{str(datetime.now())[8:19]}, {self.pair} цена {data["k"]["c"]}, {round(float(data["k"]["q"]), 1)} > {round(average_volume * 3, 1)} and {round(now_vol_diff, 1)} < {round(float(data["k"]["Q"]) * -4, 1)}, av_diff {round(hight_low["average_diff"], 2)} rsi = {round(rsi, 2)}')
                         position = True
                         breakeven = False
