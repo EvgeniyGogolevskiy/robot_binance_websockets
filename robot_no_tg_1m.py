@@ -57,12 +57,12 @@ class Strategy:
 
                         await asyncio.sleep(0.5)
 
-                    if float(data['k']['q']) > average_volume * 2 and now_vol_diff < float(data['k']['Q']) * -2 and hight_low["average_diff"] > 0.15 and rsi < 3:
+                    if float(data['k']['q']) > average_volume * 2 and now_vol_diff < float(data['k']['Q']) * -2 and hight_low["average_diff"] > 0.15 and rsi < 5:
                         price_buy = float(data['k']['c'])
                         a = buy_order(self.pair, self.dollars_for_order, price_buy)
                         price_take = a['entry_price'] * 1.007
-                        price_stop= a['entry_price'] * (1 - hight_low["average_diff"] * 0.02)
-                        price_for_traling_stop = a['entry_price'] * 1.002
+                        price_stop= a['entry_price'] * (1 - hight_low["average_diff"] * 0.03)
+                        price_for_traling_stop = a['entry_price'] * 1.0025
                         logger.info(f'{str(datetime.now())[8:19]}, {self.pair} цена {data["k"]["c"]}, {round(float(data["k"]["q"]), 1)} > {round(average_volume * 3, 1)} and {round(now_vol_diff, 1)} < {round(float(data["k"]["Q"]) * -4, 1)}, av_diff {round(hight_low["average_diff"], 2)} rsi = {round(rsi, 2)}')
                         position = True
                         breakeven = False
@@ -86,11 +86,11 @@ class Strategy:
                         position = False
                     if price_for_traling_stop <= float(data['k']['c']) < price_take:
                         if not breakeven:
-                            price_stop = a['entry_price'] * 1.001
+                            price_stop = a['entry_price'] * 1.0015
                             breakeven = True
                         if breakeven:
-                            price_stop *= 1.001
-                        price_for_traling_stop *= 1.0015
+                            price_stop *= 1.0003
+                        price_for_traling_stop *= 1.0005
 
 
 if __name__ == '__main__':
