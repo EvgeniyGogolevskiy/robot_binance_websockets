@@ -57,12 +57,12 @@ class Strategy:
 
                         await asyncio.sleep(0.5)
 
-                    if float(data['k']['q']) > average_volume * 3 and now_vol_diff < float(data['k']['Q']) * -4 and hight_low["average_diff"] > 0.15 and rsi < 1:
+                    if float(data['k']['q']) > average_volume * 3 and now_vol_diff < float(data['k']['Q']) * -0.5 and hight_low["average_diff"] > 0.2 and rsi < 10:
                         price_buy = float(data['k']['c'])
                         a = buy_order(self.pair, self.dollars_for_order, price_buy)
-                        price_take = a['entry_price'] * 1.012
-                        price_stop= a['entry_price'] * (1 - hight_low["average_diff"] * 0.04)
-                        price_for_traling_stop = a['entry_price'] * (1 + hight_low["average_diff"] * 0.03)
+                        price_take = a['entry_price'] * 1.007
+                        price_stop= a['entry_price'] * (1 - hight_low["average_diff"] * 0.02)
+                        price_for_traling_stop = a['entry_price'] * (1 + hight_low["average_diff"] * 0.01)
                         logger.info(f'{str(datetime.now())[8:19]}, {self.pair} цена {data["k"]["c"]}, {round(float(data["k"]["q"]), 1)} > {round(average_volume * 3, 1)} and {round(now_vol_diff, 1)} < {round(float(data["k"]["Q"]) * -4, 1)}, av_diff {round(hight_low["average_diff"], 2)} rsi = {round(rsi, 2)}')
                         position = True
                         breakeven = False
@@ -97,7 +97,7 @@ if __name__ == '__main__':
     loop = asyncio.get_event_loop()
     try:
         for pair in top_volatily():
-            adp = Strategy(pair, '1m', 90)
+            adp = Strategy(pair, '5m', 90)
             asyncio.ensure_future(adp.main())
         logger.info(f'start {datetime.now()}')
         loop.run_forever()
