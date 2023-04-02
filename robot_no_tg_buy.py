@@ -58,13 +58,13 @@ class Strategy:
 
                         await asyncio.sleep(0.5)
 
-                    if average_volume * 2 < float(data['k']['q']) < average_volume * 7 and sell_vol < now_vol_diff < float(data['k']['Q']) and hight_low["average_diff"] > 0.15 and rsi < 95:
+                    if average_volume * 2.5 < float(data['k']['q']) < average_volume * 7 and sell_vol < now_vol_diff < float(data['k']['Q']) and hight_low["average_diff"] > 0.15 and rsi < 95:
                         price_buy = float(data['k']['c'])
                         a = buy_order(self.pair, self.dollars_for_order, price_buy)
                         price_take = a['entry_price'] * 1.007
                         price_stop= a['entry_price'] * (1 - hight_low["average_diff"] * 0.02)
                         price_for_traling_stop = a['entry_price'] * 1.003
-                        logger.info(f'{str(datetime.now())[8:19]}, {self.pair} цена {data["k"]["c"]}, {round(float(data["k"]["q"]), 1)} > {round(average_volume * 3, 1)} and {round(now_vol_diff, 1)} < {round(float(data["k"]["Q"]) * -4, 1)}, av_diff {round(hight_low["average_diff"], 2)} rsi = {round(rsi, 2)}')
+                        logger.info(f'{str(datetime.now())[8:19]}, {self.pair} цена {data["k"]["c"]}, {average_volume * 2.5} < {float(data["k"]["q"])} < {average_volume * 7} and {sell_vol} < {now_vol_diff} < {float(data["k"]["Q"])}, av_diff {round(hight_low["average_diff"], 2)} rsi = {round(rsi, 2)}')
                         position = True
                         breakeven = False
                 while position:
