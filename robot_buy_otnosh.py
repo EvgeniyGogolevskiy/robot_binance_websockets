@@ -39,7 +39,7 @@ class Strategy:
                     except ZeroDivisionError:
                         now_vol_diff = 1
                     if data['k']['x']:
-                        vol = data['k']['q']
+                        vol = float(data['k']['q'])
                     if now_vol_diff > 2 and float(data['k']['q']) > vol:
                         price_buy = float(data['k']['c'])
                         a = buy_order(self.pair, self.dollars_for_order, price_buy)
@@ -52,7 +52,7 @@ class Strategy:
                 while position:
                     data = json.loads(await client.recv())
                     if data['k']['x']:
-                        vol = data['k']['q']
+                        vol = float(data['k']['q'])
                     if float(data['k']['c']) >= price_take:
                         sell_order(self.pair, a['amt'])
                         logger.info(f'{datetime.now()}, {self.pair}, {data["k"]["c"]}, ---------TAKE_PROFIT---------')
