@@ -24,38 +24,35 @@ class Strategy:
     def __init__(self, pair, interval, dollars):
         self.pair = pair
         self.interval = interval
-        self.data_5m = pd.DataFrame(CLIENT.futures_klines(symbol=self.pair, interval=self.interval, limit=30))
         self.dollars_for_order = dollars
 
     async def main(self):
-        list_volume_diff = calculate_volume_diff_first(self.data_5m)
+        vol = 1000000000
         position = False
         url = f'wss://fstream.binance.com/ws/{self.pair.lower()}@kline_{self.interval}'
         async with websockets.connect(url) as client:
             while True:
                 while not position:
-                    seconds = int(str(datetime.now().second))
-                    if seconds > 30:
-                        data = json.loads(await client.recv())
-                        if data['k']['x']:
-
-                            list_volume_diff = calculate_diff_volume(data, list_volume_diff, self.pair)
-
-                            await asyncio.sleep(0.5)
-
-                        if list_volume_diff[-2] > 1 and list_volume_diff[-1] > 3:
-                            price_buy = float(data['k']['c'])
-                            a = buy_order(self.pair, self.dollars_for_order, price_buy)
-                            price_take = a['entry_price'] * 1.01
-                            price_stop= a['entry_price'] * 0.99
-                            price_for_traling_stop = a['entry_price'] * 1.003
-                            logger.info(f'{str(datetime.now())[8:19]}, {self.pair} цена {data["k"]["c"]}, {list_volume_diff[-2]}, {list_volume_diff[-1]}')
-                            position = True
-                            breakeven = False
+                    data = json.loads(await client.recv())
+                    try:
+                        now_vol_diff = float(data['k']['Q']) / (float(data['k']['q']) - float(data['k']['Q']))
+                    except ZeroDivisionError:
+                        now_vol_diff = 1
+                    if data['k']['x']:
+                        vol = data['k']['q']
+                    if now_vol_diff > 2 and float(data['k']['q']) > vol:
+                        price_buy = float(data['k']['c'])
+                        a = buy_order(self.pair, self.dollars_for_order, price_buy)
+                        price_take = a['entry_price'] * 1.005
+                        price_stop= a['entry_price'] * 0.995
+                        price_for_traling_stop = a['entry_price'] * 1.003
+                        logger.info(f'{str(datetime.now())[8:19]}, {self.pair} цена {data["k"]["c"]}, {now_vol_diff}')
+                        position = True
+                        breakeven = False
                 while position:
                     data = json.loads(await client.recv())
                     if data['k']['x']:
-                        list_volume_diff = calculate_diff_volume(data, list_volume_diff, self.pair)
+                        vol = data['k']['q']
                     if float(data['k']['c']) >= price_take:
                         sell_order(self.pair, a['amt'])
                         logger.info(f'{datetime.now()}, {self.pair}, {data["k"]["c"]}, ---------TAKE_PROFIT---------')
