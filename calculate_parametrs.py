@@ -7,14 +7,18 @@ def calculate_volume_diff_first(data_5m):
     list_volume_diff = []
     for i in range(len(data_5m_volume)):
         volume_sell = float(data_5m_volume[i]) - float(data_5m_volume_buy[i])
-        volume_diff = float(data_5m_volume_buy[i]) - volume_sell
+        volume_diff = float(data_5m_volume_buy[i]) / volume_sell
         list_volume_diff.append(volume_diff)
     return list_volume_diff
 
 
-def calculate_diff_volume(data, list_volume_diff):
+def calculate_diff_volume(data, list_volume_diff,pair):
     volume_sell = float(data['k']['q']) - float(data['k']['Q'])
-    volume_diff = float(data['k']['Q']) - volume_sell
+    try:
+        volume_diff = float(data['k']['Q']) / volume_sell
+    except ZeroDivisionError:
+        print(f'Деление на ноль пары {pair} volume sell = {volume_sell}')
+        volume_diff = float(data['k']['Q']) / (volume_sell + float(data['k']['Q']))
     list_volume_diff = list_volume_diff[1:] + [volume_diff]
     return list_volume_diff
 

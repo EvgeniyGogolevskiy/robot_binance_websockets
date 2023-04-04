@@ -62,7 +62,7 @@ def top_volatily():
         time.sleep(0.1)
 
     list_top_pairs_volatily = sorted(list_top_pairs_volatily, key=lambda volume: volume[1], reverse=True)
-    list_top_pairs_volatily = list_top_pairs_volatily[:30]
+    list_top_pairs_volatily = list_top_pairs_volatily[:15]
     top = []
     for i in range(len(list_top_pairs_volatily)):
         top.append(list_top_pairs_volatily[i][0])
