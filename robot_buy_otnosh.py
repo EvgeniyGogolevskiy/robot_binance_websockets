@@ -40,7 +40,7 @@ class Strategy:
                         now_vol_diff = 1
                     if data['k']['x']:
                         vol = float(data['k']['q'])
-                    if now_vol_diff > 2 and float(data['k']['q']) > vol:
+                    if now_vol_diff > 2 and float(data['k']['q']) > vol*1.5:
                         price_buy = float(data['k']['c'])
                         a = buy_order(self.pair, self.dollars_for_order, price_buy)
                         price_take = a['entry_price'] * 1.005
