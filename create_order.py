@@ -40,7 +40,9 @@ def sell_order(pair, lot):
     while True:
         try:
             CLIENT.futures_create_order(symbol=pair, side='SELL', type='MARKET', quantity=lot)
-            break
+            info = CLIENT.futures_position_information(symbol=pair)
+            a = {'entry_price': float(info[0]['entryPrice']), 'amt': float(info[0]['positionAmt'])}
+            return a
         except Exception as error:
             print(f' {datetime.now}, {pair}, {error}')
             time.sleep(0.1)

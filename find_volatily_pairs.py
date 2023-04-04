@@ -27,7 +27,7 @@ def analise_volume():
         time.sleep(0.2)
 
         try:
-            data = pd.DataFrame(CLIENT.futures_klines(symbol=cripto_pair, interval='30m', limit=24))
+            data = pd.DataFrame(CLIENT.futures_klines(symbol=cripto_pair, interval='4h', limit=42))
             volume_pair = data[7].astype(float).sum()
             list_pair_volume.append((cripto_pair, volume_pair))
         except Exception as error:
@@ -35,8 +35,9 @@ def analise_volume():
             continue
     if len(list_pair_volume) != 0:
         sorted_list_pair_volume = sorted(list_pair_volume, key=lambda volume: volume[1], reverse=True)
-        fix_pecent_list_pair = sorted_list_pair_volume[:int((len(list_pair_volume) * 25) / 100)]
+        fix_pecent_list_pair = sorted_list_pair_volume[:int((len(list_pair_volume) * 11) / 100)]
         fix_pecent_list_pair = [pair[0] for pair in fix_pecent_list_pair]
+        print(fix_pecent_list_pair)
         return fix_pecent_list_pair
     else:
         return None
@@ -48,7 +49,7 @@ def top_volatily():
 
     for pair in pairs:
         try:
-            data = CLIENT.futures_klines(symbol=pair, interval='30m', limit=8)
+            data = CLIENT.futures_klines(symbol=pair, interval='5m', limit=48)
         except Exception as error:
             print(f"По паре {pair} не удалось скачать данные по свечам", error)
             continue
@@ -62,7 +63,7 @@ def top_volatily():
         time.sleep(0.1)
 
     list_top_pairs_volatily = sorted(list_top_pairs_volatily, key=lambda volume: volume[1], reverse=True)
-    list_top_pairs_volatily = list_top_pairs_volatily[:15]
+    list_top_pairs_volatily = list_top_pairs_volatily[:20]
     top = []
     for i in range(len(list_top_pairs_volatily)):
         top.append(list_top_pairs_volatily[i][0])
