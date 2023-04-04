@@ -46,7 +46,7 @@ class Strategy:
                         price_take = a['entry_price'] * 1.005
                         price_stop= a['entry_price'] * 0.995
                         price_for_traling_stop = a['entry_price'] * 1.003
-                        logger.info(f'{str(datetime.now())[8:19]}, {self.pair} цена {data["k"]["c"]}, {now_vol_diff}')
+                        logger.info(f'{str(datetime.now())[8:19]}, {self.pair} цена {data["k"]["c"]}, {now_vol_diff} > 2 and {float(data["k"]["q"])} > {vol}')
                         position = True
                         breakeven = False
                 while position:
