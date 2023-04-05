@@ -36,7 +36,10 @@ class Strategy:
             while True:
                 while not position:
                     data = json.loads(await client.recv())
-                    now_vol_diff = float(data['k']['Q']) - (float(data['k']['q']) - float(data['k']['Q']))
+                    try:
+                        now_vol_diff = float(data['k']['Q']) / (float(data['k']['q']) - float(data['k']['Q']))
+                    except ZeroDivisionError:
+                        now_vol_diff = 1
                     now_high_low = (float(data['k']['h']) - float(data['k']['l'])) * 100 / float(data['k']['h'])
                     if data['k']['x']:
 
@@ -51,7 +54,7 @@ class Strategy:
                         a = buy_order(self.pair, self.dollars_for_order, price_buy)
                         price_take = a['entry_price'] * (1 + now_high_low * 0.004)
                         price_stop= a['entry_price'] * (1 - now_high_low * 0.01)
-                        logger.info(f'{str(datetime.now())[8:19]}, {self.pair} цена {data["k"]["c"]}, {average_volume * 1.5} < {float(data["k"]["q"])} and {now_high_low} > 0.9 and {now_vol_diff} < 0.6 and {float(data["k"]["c"])} < {float(data["k"]["o"])}')
+                        logger.info(f'{str(datetime.now())[8:19]}, {self.pair} цена {data["k"]["c"]}, {average_volume * 1.5} < {float(data["k"]["q"])} and {now_high_low} > 0.9 and {now_vol_diff} < 0.6')
                         position = True
                 while position:
                     data = json.loads(await client.recv())
