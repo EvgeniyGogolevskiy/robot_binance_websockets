@@ -5,7 +5,7 @@ import json
 from binance.client import Client
 from config import api, secret
 from create_order import buy_order, sell_order
-from find_volatily_pairs import analise_volume
+from find_volatily_pairs import top_volatily
 import logging
 import sys
 import warnings
@@ -76,7 +76,7 @@ class Strategy:
 if __name__ == '__main__':
     loop = asyncio.get_event_loop()
     try:
-        for pair in analise_volume():
+        for pair in top_volatily():
             adp = Strategy(pair, '1m', 30)
             asyncio.ensure_future(adp.main())
         logger.info(f'start {datetime.now()}')
