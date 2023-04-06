@@ -6,7 +6,7 @@ import json
 from binance.client import Client
 import pandas as pd
 from config import api, secret
-from calculate_parametrs import calculate_diff_first, calculate_diff, calculate_volume_diff_first, calculate_diff_volume
+from calculate_parametrs import calculate_diff_first, calculate_diff
 from create_order import buy_order, sell_order
 from find_volatily_pairs import top_volatily
 import logging
@@ -31,8 +31,6 @@ class Strategy:
     async def main(self):
         list_volume = list(map(float, self.data_5m[7][19:29]))
         average_volume = statistics.mean(list_volume)
-        list_volume_diff = calculate_volume_diff_first(self.data_5m)
-        average_vol_diff = statistics.median(list_volume_diff)
         hight_low = calculate_diff_first(self.data_5m)
         position = False
         url = f'wss://fstream.binance.com/ws/{self.pair.lower()}@kline_{self.interval}'
@@ -50,28 +48,24 @@ class Strategy:
                         """"""" Расчёт объёма """""""
                         list_volume = list_volume[1:] + [float(data['k']['q'])]
                         average_volume = statistics.median(list_volume)
-                        list_volume_diff = calculate_diff_volume(data, list_volume_diff)
-                        average_vol_diff = statistics.median(list_volume_diff)
 
                         """"""" Расчёт волатильности """""""
                         hight_low = calculate_diff(data, hight_low['list_diff'], hight_low['data_5m_low'])
 
                         await asyncio.sleep(0.5)
 
-                    if average_volume*1.5 < float(data['k']['q']) and now_high_low > hight_low['average_diff']*4 and now_vol_diff < 0.6 and float(data['k']['c']) < float(data['k']['o']):
+                    if average_volume*1.5 < float(data['k']['q']) and 0.45 < hight_low['average_diff']*4.5 < now_high_low < hight_low['average_diff']*9 and now_vol_diff < 0.6 and float(data['k']['c']) < float(data['k']['o']):
                         price_buy = float(data['k']['c'])
                         a = buy_order(self.pair, self.dollars_for_order, price_buy)
                         price_take = a['entry_price'] * (1 + now_high_low * 0.006)
                         price_stop= a['entry_price'] * (1 - now_high_low * 0.01)
-                        logger.info(f'{str(datetime.now())[8:19]}, {self.pair} цена {data["k"]["c"]}, {average_volume * 1.5} < {float(data["k"]["q"])} and {now_high_low} > {hight_low["average_diff"]} and {now_vol_diff} < 0.6 and average_vol_diff = {average_vol_diff}')
+                        logger.info(f'{str(datetime.now())[8:19]}, {self.pair} цена {data["k"]["c"]}, {average_volume * 1.5} < {float(data["k"]["q"])} and {hight_low["average_diff"]*4.5} < {now_high_low} < {hight_low["average_diff"]*9} and {now_vol_diff} < 0.6')
                         position = True
                 while position:
                     data = json.loads(await client.recv())
                     if data['k']['x']:
                         list_volume = list_volume[1:] + [float(data['k']['q'])]
                         average_volume = statistics.mean(list_volume)
-                        list_volume_diff = calculate_diff_volume(data, list_volume_diff)
-                        average_vol_diff = statistics.median(list_volume_diff)
                         hight_low = calculate_diff(data, hight_low['list_diff'], hight_low['data_5m_low'])
                     if float(data['k']['c']) >= price_take:
                         sell_order(self.pair, a['amt'])
