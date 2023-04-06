@@ -12,13 +12,12 @@ def calculate_volume_diff_first(data_5m):
     return list_volume_diff
 
 
-def calculate_diff_volume(data, list_volume_diff,pair):
+def calculate_diff_volume(data, list_volume_diff):
     volume_sell = float(data['k']['q']) - float(data['k']['Q'])
     try:
         volume_diff = float(data['k']['Q']) / volume_sell
     except ZeroDivisionError:
-        print(f'Деление на ноль пары {pair} volume sell = {volume_sell}')
-        volume_diff = float(data['k']['Q']) / (volume_sell + float(data['k']['Q']))
+        volume_diff = 1
     list_volume_diff = list_volume_diff[1:] + [volume_diff]
     return list_volume_diff
 
