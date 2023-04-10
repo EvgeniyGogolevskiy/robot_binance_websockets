@@ -54,12 +54,12 @@ class Strategy:
 
                         await asyncio.sleep(0.5)
 
-                    if average_volume*1.5 < float(data['k']['q']) and 0.6 < data_klines['average_diff']*4 < now_high_low < data_klines['average_diff']*12 < 2.5 and now_vol_diff < 1 and float(data['k']['o']) < data_klines['MA9'] and float(data['k']['c']) < float(data['k']['o']):
+                    if average_volume*7 < float(data['k']['q']) and 0.6 < now_high_low < 2.5 and float(data['k']['h']) < data_klines['MA9'] and float(data['k']['c']) < float(data['k']['o']):
                         price_buy = float(data['k']['c'])
                         a = buy_order(self.pair, self.dollars_for_order, price_buy)
-                        price_take = a['entry_price'] * (1 + now_high_low * 0.006)
+                        price_take = a['entry_price'] * (1 + now_high_low * 0.01)
                         price_stop= a['entry_price'] * (1 - now_high_low * 0.005)
-                        logger.info(f'{str(datetime.now())[8:19]}, {self.pair} цена {data["k"]["c"]}, {average_volume * 1.5} < {float(data["k"]["q"])} and {data_klines["average_diff"]*4} < {now_high_low} < {data_klines["average_diff"]*12} and {now_vol_diff} < 0.6 and {data_klines["MA9"]}')
+                        logger.info(f'{str(datetime.now())[8:19]}, {self.pair} цена {data["k"]["c"]}, vol= {float(data["k"]["q"])}, ampl= {now_high_low}, avg-ampl= {data_klines["average_diff"]}, vol_otnosh= {now_vol_diff}, MA9= {data_klines["MA9"]}')
                         position = True
                 while position:
                     data = json.loads(await client.recv())
