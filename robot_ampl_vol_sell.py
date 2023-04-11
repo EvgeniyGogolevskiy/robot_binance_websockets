@@ -51,7 +51,7 @@ class Strategy:
                         average_volume = statistics.median(list_volume)
 
                         """"""" Расчёт волатильности """""""
-                        data_klines = calculate_diff(data, data_klines['list_diff'], data_klines['data_5m_close'])
+                        data_klines = calculate_diff(data, data_klines['list_diff'], data_klines['data_close'])
 
                         await asyncio.sleep(0.5)
 
@@ -68,7 +68,7 @@ class Strategy:
                     if data['k']['x']:
                         list_volume = list_volume[1:] + [float(data['k']['q'])]
                         average_volume = statistics.median(list_volume)
-                        data_klines = calculate_diff(data, data_klines['list_diff'], data_klines['data_5m_close'])
+                        data_klines = calculate_diff(data, data_klines['list_diff'], data_klines['data_close'])
                     if float(data['k']['c']) >= price_take:
                         sell_order(self.pair, a['amt'])
                         logger.info(f'{str(datetime.now())[8:19]}, {self.pair}, {data["k"]["c"]}, ---------TAKE_PROFIT---------')
