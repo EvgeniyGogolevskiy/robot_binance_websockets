@@ -55,13 +55,13 @@ class Strategy:
 
                         await asyncio.sleep(0.5)
 
-                    if average_volume*7 < float(data['k']['q']) and 0.6 < now_high_low < 2.5 and float(data['k']['h']) < MA9 and float(data['k']['c']) < float(data['k']['o']):
+                    if average_volume*7 < float(data['k']['q']) and 0.6 < now_high_low < 2.5 and float(data['k']['h']) < MA9 and float(data['k']['c']) < MA9*(1 - now_high_low * 0.01) and 0.1 < now_vol_diff < 0.7:
                         price_buy = float(data['k']['c'])
                         a = buy_order(self.pair, self.dollars_for_order, price_buy)
                         if a['position']:
-                            price_take = a['entry_price'] * (1 + now_high_low * 0.01)
-                            price_stop= a['entry_price'] * (1 - now_high_low * 0.005)
-                            logger.info(f'{str(datetime.now())[8:19]}, {self.pair} цена {data["k"]["c"]}, vol= {float(data["k"]["q"])}, ampl= {now_high_low}, avg-ampl= {data_klines["average_diff"]}, vol_otnosh= {now_vol_diff}, MA9= {MA9}')
+                            price_take = a['entry_price'] * (1 + now_high_low * 0.008)
+                            price_stop= a['entry_price'] * (1 - now_high_low * 0.004)
+                            logger.info(f'{str(datetime.now())[8:19]}, {self.pair} цена {data["k"]["c"]}, vol= {float(data["k"]["q"])}, avg-vol= {average_volume}, ampl= {now_high_low}, avg-ampl= {data_klines["average_diff"]}, vol_otnosh= {now_vol_diff}, MA9= {MA9}')
                             position = True
                 while position:
                     data = json.loads(await client.recv())
@@ -83,7 +83,7 @@ if __name__ == '__main__':
     loop = asyncio.get_event_loop()
     try:
         for pair in top_volatily():
-            adp = Strategy(pair, '1m', 90)
+            adp = Strategy(pair, '1m', 650)
             asyncio.ensure_future(adp.main())
         logger.info(f'start {datetime.now()}')
         loop.run_forever()
