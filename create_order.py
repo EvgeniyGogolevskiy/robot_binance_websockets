@@ -25,15 +25,15 @@ def size_lot(transaction_amount, price_buy):
 
 def buy_order(pair, depo, price_buy):
     lot = size_lot(depo, price_buy)
-    while True:
-        try:
-            CLIENT.futures_create_order(symbol=pair, side='BUY', type='MARKET', quantity=lot)
-            info = CLIENT.futures_position_information(symbol=pair)
-            a = {'entry_price': float(info[0]['entryPrice']), 'amt': float(info[0]['positionAmt'])}
-            return a
-        except Exception as error:
-            print(f' {datetime.now}, {pair}, {error}')
-            time.sleep(0.1)
+    try:
+        CLIENT.futures_create_order(symbol=pair, side='BUY', type='MARKET', quantity=lot)
+        info = CLIENT.futures_position_information(symbol=pair)
+        a = {'entry_price': float(info[0]['entryPrice']), 'amt': float(info[0]['positionAmt']), 'position': True}
+        return a
+    except Exception as error:
+        print(f' {datetime.now}, {pair}, {error}')
+        a = {'position': False}
+        return a
 
 
 def sell_order(pair, lot):
