@@ -55,7 +55,7 @@ class Strategy:
 
                         await asyncio.sleep(0.5)
 
-                    if average_volume*6 < float(data['k']['q']) and 0.6 < now_high_low < 2.5 and float(data['k']['c']) < MA9*(1 - now_high_low * 0.015) and 0.1 < now_vol_diff < 0.7:
+                    if average_volume*3 < float(data['k']['q']) and 0.4 < now_high_low < 2.5 and float(data['k']['c']) < MA9*(1 - now_high_low * 0.015) and 0.1 < now_vol_diff < 0.7:
                         price_buy = float(data['k']['c'])
                         a = buy_order(self.pair, self.dollars_for_order, price_buy)
                         if a['position']:
@@ -83,7 +83,7 @@ if __name__ == '__main__':
     loop = asyncio.get_event_loop()
     try:
         for pair in top_volatily():
-            adp = Strategy(pair, '1m', 650)
+            adp = Strategy(pair, '1m', 250)
             asyncio.ensure_future(adp.main())
         logger.info(f'start {datetime.now()}')
         loop.run_forever()
