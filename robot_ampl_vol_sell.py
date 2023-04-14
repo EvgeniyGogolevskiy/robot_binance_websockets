@@ -32,6 +32,7 @@ class Strategy:
         list_volume = list(map(float, self.data_5m[7][19:29]))
         average_volume = statistics.median(list_volume)
         data_klines = calculate_diff_first(self.data_5m)
+        last_high_low = 1
         position = False
         url = f'wss://fstream.binance.com/ws/{self.pair.lower()}@kline_{self.interval}'
         async with websockets.connect(url) as client:
@@ -43,7 +44,7 @@ class Strategy:
                     except ZeroDivisionError:
                         now_vol_diff = 1
                     now_high_low = round((float(data['k']['h']) - float(data['k']['l'])) * 100 / float(data['k']['h']),2)
-                    MA9 = statistics.mean(data_klines['data_close'][:-1] + [float(data['k']['c'])])
+                    MA18 = statistics.mean(data_klines['data_close'][:-1] + [float(data['k']['c'])])
                     if data['k']['x']:
 
                         """"""" Расчёт объёма """""""
@@ -52,16 +53,19 @@ class Strategy:
 
                         """"""" Расчёт волатильности """""""
                         data_klines = calculate_diff(data, data_klines['list_diff'], data_klines['data_close'])
+                        last_high_low = round((float(data['k']['h']) - float(data['k']['l'])) * 100 / float(data['k']['h']),2)
 
                         await asyncio.sleep(0.5)
 
-                    if average_volume*3 < float(data['k']['q']) and 0.4 < now_high_low < 2.5 and float(data['k']['c']) < MA9*(1 - now_high_low * 0.015) and 0.1 < now_vol_diff < 0.7:
+                    if average_volume*3 < float(data['k']['q']) and 0.4 < now_high_low < 2.5 and float(data['k']['c']) < MA18*(1 - (now_high_low+last_high_low) * 0.01) and 0.1 < now_vol_diff < 0.7:
                         price_buy = float(data['k']['c'])
                         a = buy_order(self.pair, self.dollars_for_order, price_buy)
                         if a['position']:
                             price_take = a['entry_price'] * (1 + now_high_low * 0.008)
                             price_stop= a['entry_price'] * (1 - now_high_low * 0.004)
-                            logger.info(f'{str(datetime.now())[8:19]}, {self.pair} цена {data["k"]["c"]}, vol/avg-vol= {round(float(data["k"]["q"]) / average_volume, 2)}, ampl= {now_high_low}, avg-ampl= {data_klines["average_diff"]}, vol_otnosh= {now_vol_diff}, MA9= {MA9}')
+                            logger.info(f'{str(datetime.now())[8:19]}, {self.pair} цена {data["k"]["c"]}, vol/avg-vol= {round(float(data["k"]["q"]) / average_volume, 2)},'
+                                        f'ampl= {now_high_low}, avg-ampl= {data_klines["average_diff"]}, vol_otnosh= {now_vol_diff},'
+                                        f'MA18= {MA18*(1 - (now_high_low+last_high_low) * 0.01)}')
                             position = True
                 while position:
                     data = json.loads(await client.recv())
@@ -69,6 +73,7 @@ class Strategy:
                         list_volume = list_volume[1:] + [float(data['k']['q'])]
                         average_volume = statistics.median(list_volume)
                         data_klines = calculate_diff(data, data_klines['list_diff'], data_klines['data_close'])
+                        last_high_low = round((float(data['k']['h']) - float(data['k']['l'])) * 100 / float(data['k']['h']), 2)
                     if float(data['k']['c']) >= price_take:
                         sell_order(self.pair, a['amt'])
                         logger.info(f'{str(datetime.now())[8:19]}, {self.pair}, {data["k"]["c"]}, ---------TAKE_PROFIT---------')
