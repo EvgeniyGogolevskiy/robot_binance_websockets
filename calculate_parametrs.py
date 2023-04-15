@@ -38,7 +38,8 @@ def calculate_diff_first(data_5m):
 def calculate_diff(data, list_diff, data_5m_close):
     diff = (float(data['k']['h']) - float(data['k']['l'])) * 100 / float(data['k']['h'])
     data_close = data_5m_close[1:] + [float(data['k']['c'])]
+    data_close9 = data_5m_close[1:] + [float(data['k']['c'])]
     list_diff = list_diff[1:] + [diff]
     average_diff = round(statistics.mean(list_diff),2)
-    a = {'list_diff': list_diff, 'average_diff': average_diff, 'data_close': data_close}
+    a = {'list_diff': list_diff, 'average_diff': average_diff, 'data_close': data_close, 'data_close9': data_close9}
     return a
