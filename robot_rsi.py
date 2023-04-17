@@ -29,6 +29,8 @@ class Strategy:
 
     async def main(self):
         data_rsi = self.data_5m[4][:30].astype(float)
+        rsi12_last = list(ta.rsi(data_rsi, length=12))[-1]
+        rsi24_last = list(ta.rsi(data_rsi, length=24))[-1]
         position = False
         url = f'wss://fstream.binance.com/ws/{self.pair.lower()}@kline_{self.interval}'
         async with websockets.connect(url) as client:
@@ -70,7 +72,7 @@ if __name__ == '__main__':
     loop = asyncio.get_event_loop()
     try:
         for pair in top_volatily():
-            adp = Strategy(pair, '1m', 200)
+            adp = Strategy(pair, '1m', 100)
             asyncio.ensure_future(adp.main())
         logger.info(f'start {datetime.now()}')
         loop.run_forever()
