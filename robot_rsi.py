@@ -24,7 +24,7 @@ class Strategy:
     def __init__(self, pair, interval, dollars):
         self.pair = pair
         self.interval = interval
-        self.data_5m = pd.DataFrame(CLIENT.futures_klines(symbol=self.pair, interval=self.interval, limit=100))
+        self.data_5m = pd.DataFrame(CLIENT.futures_klines(symbol=self.pair, interval=self.interval, limit=300))
         self.dollars_for_order = dollars
 
     async def main(self):
@@ -53,7 +53,7 @@ class Strategy:
                         price_buy = float(data['k']['c'])
                         a = buy_order(self.pair, self.dollars_for_order, price_buy)
                         if a['position']:
-                            logger.info(f'{str(datetime.now())[8:19]}, {self.pair} цена {data["k"]["c"]}')
+                            logger.info(f'{str(datetime.now())[8:19]}, {self.pair} цена {data["k"]["c"]}, rsi_last= {rsi12_last}, rsi= {rsi12}')
                             position = True
                 while position:
                     data = json.loads(await client.recv())
