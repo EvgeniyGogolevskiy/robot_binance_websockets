@@ -24,11 +24,11 @@ class Strategy:
     def __init__(self, pair, interval, dollars):
         self.pair = pair
         self.interval = interval
-        self.data_5m = pd.DataFrame(CLIENT.futures_klines(symbol=self.pair, interval=self.interval, limit=300))
+        self.data_5m = pd.DataFrame(CLIENT.futures_klines(symbol=self.pair, interval=self.interval, limit=200))
         self.dollars_for_order = dollars
 
     async def main(self):
-        data_rsi = self.data_5m[4][:30].astype(float)
+        data_rsi = self.data_5m[4][:200].astype(float)
         rsi12_last = list(ta.rsi(data_rsi, length=12))[-1]
         rsi24_last = list(ta.rsi(data_rsi, length=24))[-1]
         position = False
@@ -37,13 +37,13 @@ class Strategy:
             while True:
                 while not position:
                     data = json.loads(await client.recv())
-                    data_rsi[29] = float(data['k']['c'])
+                    data_rsi[199] = float(data['k']['c'])
                     rsi12 = list(ta.rsi(data_rsi, length=12))[-1]
                     rsi24 = list(ta.rsi(data_rsi, length=24))[-1]
                     if data['k']['x']:
 
                         """"""" Расчёт индикатора RSI """""""
-                        data_rsi = data_rsi[1:29].append(pd.Series([float(data['k']['c'])]))
+                        data_rsi = data_rsi[1:199].append(pd.Series([float(data['k']['c'])]))
                         rsi12_last = list(ta.rsi(data_rsi, length=12))[-1]
                         rsi24_last = list(ta.rsi(data_rsi, length=24))[-1]
 
@@ -60,8 +60,8 @@ class Strategy:
                     rsi12 = list(ta.rsi(data_rsi, length=12))[-1]
                     rsi24 = list(ta.rsi(data_rsi, length=24))[-1]
                     if data['k']['x']:
-                        data_rsi[29] = float(data['k']['c'])
-                        data_rsi = data_rsi[1:29].append(pd.Series([float(data['k']['c'])]))
+                        data_rsi[199] = float(data['k']['c'])
+                        data_rsi = data_rsi[1:199].append(pd.Series([float(data['k']['c'])]))
                     if rsi12 < rsi24*0.85:
                         sell_order(self.pair, a['amt'])
                         logger.info(f'{str(datetime.now())[8:19]}, {self.pair}, {data["k"]["c"]}, pnl= {(float(data["k"]["c"]) - price_buy) * 100 / float(data["k"]["c"])}')
