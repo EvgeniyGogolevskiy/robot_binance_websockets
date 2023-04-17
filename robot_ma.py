@@ -55,16 +55,16 @@ class Strategy:
 
                         await asyncio.sleep(0.5)
 
-                    if average_volume*2 < float(data['k']['q']) and float(data['k']['o'] < MA18 < float(data['k']['q'])):
-                        price_buy = float(data['k']['c'])
-                        a = buy_order(self.pair, self.dollars_for_order, price_buy)
-                        if a['position']:
-                            price_take = a['entry_price'] * (1 + now_high_low * 0.01)
-                            price_stop= a['entry_price'] * (1 - now_high_low * 0.004)
-                            logger.info(f'{str(datetime.now())[8:19]}, {self.pair} цена {data["k"]["c"]}, vol/avg-vol= {round(float(data["k"]["q"]) / average_volume, 2)},'
-                                        f'ampl= {now_high_low}, avg-ampl= {data_klines["average_diff"]}, vol_otnosh= {now_vol_diff},'
-                                        f'MA18= {MA18},')
-                            position = True
+                        if average_volume*2 < float(data['k']['q']) and float(data['k']['o'] < MA18 < float(data['k']['q'])):
+                            price_buy = float(data['k']['c'])
+                            a = buy_order(self.pair, self.dollars_for_order, price_buy)
+                            if a['position']:
+                                price_take = a['entry_price'] * (1 + now_high_low * 0.01)
+                                price_stop= a['entry_price'] * (1 - now_high_low * 0.004)
+                                logger.info(f'{str(datetime.now())[8:19]}, {self.pair} цена {data["k"]["c"]}, vol/avg-vol= {round(float(data["k"]["q"]) / average_volume, 2)},'
+                                            f'ampl= {now_high_low}, avg-ampl= {data_klines["average_diff"]}, vol_otnosh= {now_vol_diff},'
+                                            f'MA18= {MA18},')
+                                position = True
                 while position:
                     data = json.loads(await client.recv())
                     if data['k']['x']:
