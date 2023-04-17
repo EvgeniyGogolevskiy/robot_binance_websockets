@@ -30,7 +30,6 @@ class Strategy:
 
     async def main(self):
         list_volume = list(map(float, self.data_5m[7][19:29]))
-        average_volume = statistics.median(list_volume)
         data_klines = calculate_diff_first(self.data_5m)
         position = False
         url = f'wss://fstream.binance.com/ws/{self.pair.lower()}@kline_{self.interval}'
@@ -55,7 +54,7 @@ class Strategy:
 
                         await asyncio.sleep(0.5)
 
-                        if average_volume*2 < float(data['k']['q']) and float(data['k']['o']) < MA18 < float(data['k']['q']):
+                        if average_volume*2 < float(data['k']['q']) and float(data['k']['o']) < MA18 < float(data['k']['c']):
                             price_buy = float(data['k']['c'])
                             a = buy_order(self.pair, self.dollars_for_order, price_buy)
                             if a['position']:
@@ -69,7 +68,6 @@ class Strategy:
                     data = json.loads(await client.recv())
                     if data['k']['x']:
                         list_volume = list_volume[1:] + [float(data['k']['q'])]
-                        average_volume = statistics.median(list_volume)
                         data_klines = calculate_diff(data, data_klines['list_diff'], data_klines['data_close'])
                     if float(data['k']['c']) >= price_take:
                         sell_order(self.pair, a['amt'])
