@@ -55,7 +55,7 @@ class Strategy:
 
                         await asyncio.sleep(0.5)
 
-                    if average_volume*5 < float(data['k']['q']) and data_klines["average_diff"]*3 < now_high_low and float(data['k']['c']) < MA4*(1 - now_high_low * 0.01):
+                    if average_volume*7 < float(data['k']['q']) and 0.6 < data_klines["average_diff"]*3 < now_high_low and float(data['k']['c']) < MA4*(1 - now_high_low * 0.01) and now_vol_diff < 0.26:
                         price_buy = float(data['k']['c'])
                         a = buy_order(self.pair, self.dollars_for_order, price_buy)
                         if a['position']:
