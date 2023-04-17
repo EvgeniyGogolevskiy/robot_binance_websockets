@@ -19,4 +19,4 @@ RUN pip install --upgrade pip
 RUN pip install -r requirements.txt
 
 # Запуск через /bin/bash необходим для поддержки переменных окружения
-CMD ["/bin/bash", "-c", "python3 robot_ampl_vol_sell.py "]
+CMD ["/bin/bash", "-c", "python3 robot_ma.py "]
