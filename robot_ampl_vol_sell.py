@@ -43,7 +43,7 @@ class Strategy:
                     except ZeroDivisionError:
                         now_vol_diff = 1
                     now_high_low = round((float(data['k']['h']) - float(data['k']['l'])) * 100 / float(data['k']['h']),2)
-                    MA4 = statistics.mean(data_klines['data_close'][:-1] + [float(data['k']['c'])])
+                    MA9 = statistics.mean(data_klines['data_close'][:-1] + [float(data['k']['c'])])
                     if data['k']['x']:
 
                         """"""" Расчёт объёма """""""
@@ -55,7 +55,7 @@ class Strategy:
 
                         await asyncio.sleep(0.5)
 
-                    if average_volume*7 < float(data['k']['q']) and 0.6 < data_klines["average_diff"]*3 < now_high_low and float(data['k']['c']) < MA4*(1 - now_high_low * 0.01) and now_vol_diff < 0.26:
+                    if average_volume*7 < float(data['k']['q']) and 0.6 < now_high_low < 2.5 and float(data['k']['h']) < MA9 and float(data['k']['c']) < MA9*(1 - now_high_low * 0.01) and 0.1 < now_vol_diff < 0.7:
                         price_buy = float(data['k']['c'])
                         a = buy_order(self.pair, self.dollars_for_order, price_buy)
                         if a['position']:
@@ -63,7 +63,7 @@ class Strategy:
                             price_stop= a['entry_price'] * (1 - now_high_low * 0.004)
                             logger.info(f'{str(datetime.now())[8:19]}, {self.pair} цена {data["k"]["c"]}, vol/avg-vol= {round(float(data["k"]["q"]) / average_volume, 2)},'
                                         f'ampl= {now_high_low}, avg-ampl= {data_klines["average_diff"]}, vol_otnosh= {now_vol_diff},'
-                                        f'MA4= {MA4*(1 - now_high_low * 0.01)},')
+                                        f'MA9= {MA9*(1 - now_high_low * 0.01)},')
                             position = True
                 while position:
                     data = json.loads(await client.recv())
@@ -85,7 +85,7 @@ if __name__ == '__main__':
     loop = asyncio.get_event_loop()
     try:
         for pair in top_volatily():
-            adp = Strategy(pair, '1m', 200)
+            adp = Strategy(pair, '1m', 300)
             asyncio.ensure_future(adp.main())
         logger.info(f'start {datetime.now()}')
         loop.run_forever()
