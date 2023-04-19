@@ -63,6 +63,10 @@ class Strategy:
                             price_take = a['entry_price'] * (1 + now_high_low * 0.006)
                             price_stop= a['entry_price'] * (1 - now_high_low * 0.006)
                             position = True
+                            avg_vol1 = average_volume
+                            ampl1 = now_high_low
+                            avg_ampl1 = data_klines['average_diff']
+                            vol_otnosh = now_vol_diff
                 while position:
                     data = json.loads(await client.recv())
                     if data['k']['x']:
@@ -73,8 +77,8 @@ class Strategy:
                         sell_order(self.pair, a['amt'])
                         logger.info(
                             f'take_profit, '
-                            f'{str(datetime.now())[8:19]}, {self.pair} цена {data["k"]["c"]}, vol/avg-vol= {round(float(data["k"]["q"]) / average_volume, 2)},'
-                            f'ampl= {now_high_low}, avg-ampl= {data_klines["average_diff"]}, vol_otnosh= {now_vol_diff},'
+                            f'{str(datetime.now())[8:19]}, {self.pair} цена {data["k"]["c"]}, vol/avg-vol= {round(float(data["k"]["q"]) / avg_vol1, 2)},'
+                            f'ampl= {ampl1}, avg-ampl= {avg_ampl1}, vol_otnosh= {vol_otnosh},'
                             f'MA9= {MA9 * (1 - now_high_low * 0.01)},')
                         position = False
                     if float(data['k']['c']) <= price_stop:
