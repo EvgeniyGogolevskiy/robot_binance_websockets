@@ -55,7 +55,7 @@ class Strategy:
 
                         await asyncio.sleep(0.5)
 
-                    if float(data['k']['l']) < MA3*(1 - data_klines['average_diff'] * 0.01) and MA3 < float(data['k']['c']) and now_high_low > 0.2:
+                    if float(data['k']['l']) < MA3*(1 - data_klines['average_diff'] * 0.01) and MA3 < float(data['k']['o']) < float(data['k']['c']) and now_high_low > 0.2:
                         price_buy = float(data['k']['c'])
                         a = buy_order(self.pair, self.dollars_for_order, price_buy)
                         if a['position']:
