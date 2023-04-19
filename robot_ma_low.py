@@ -55,13 +55,13 @@ class Strategy:
 
                         await asyncio.sleep(0.5)
 
-                    if float(data['k']['l']) < MA3*(1 - now_high_low * 0.01) and MA3 < float(data['k']['c']):
+                    if float(data['k']['l']) < MA3*(1 - data_klines['average_diff'] * 0.01) and MA3 < float(data['k']['c']) and now_high_low > 0.2:
                         price_buy = float(data['k']['c'])
                         a = buy_order(self.pair, self.dollars_for_order, price_buy)
                         if a['position']:
-                            price_breakeven = max(a['entry_price'] * (1 + now_high_low * 0.01), a['entry_price']*1.005)
-                            price_take = max(a['entry_price'] * (1 + now_high_low * 0.02), a['entry_price']*1.02)
-                            price_stop= max(a['entry_price'] * (1 - now_high_low * 0.01), a['entry_price']*0.997)
+                            price_breakeven = a['entry_price'] * (1 + now_high_low * 0.01)
+                            price_take = a['entry_price'] * (1 + now_high_low * 0.02)
+                            price_stop= a['entry_price'] * (1 - now_high_low * 0.01)
                             position = True
                             breakeven = False
                             avg_vol1 = average_volume
@@ -69,6 +69,7 @@ class Strategy:
                             avg_ampl1 = data_klines['average_diff']
                             vol_otnosh = now_vol_diff
                             vol1 = float(data['k']['q'])
+                            low1 = float(data['k']['l'])
                 while position:
                     data = json.loads(await client.recv())
                     if data['k']['x']:
@@ -82,21 +83,24 @@ class Strategy:
                         sell_order(self.pair, a['amt'])
                         logger.info(
                             f'take_profit, '
-                            f'{str(datetime.now())[8:19]}, {self.pair} цена открытия= {price_buy}, vol= {vol1}, avg-vol={avg_vol1}'
-                            f'ampl= {ampl1}, avg-ampl= {avg_ampl1}, vol_otnosh= {vol_otnosh}, MA3= {MA3}')
+                            f'{str(datetime.now())[8:19]}, {self.pair}, low= {low1}, MA3= {round(MA3,4)}, '
+                            f'ampl= {ampl1}, avg-ampl= {avg_ampl1}, '
+                            f'vol= {round(vol1,2)}, avg-vol= {round(avg_vol1,2)}, vol_otnosh={vol_otnosh} ')
                         position = False
                     if float(data['k']['c']) <= price_stop:
                         sell_order(self.pair, a['amt'])
                         if not breakeven:
                             logger.info(
                                 f'stop_loss, '
-                                f'{str(datetime.now())[8:19]}, {self.pair} цена открытия= {price_buy}, vol= {vol1}, avg-vol={avg_vol1}, '
-                                f'ampl= {ampl1}, avg-ampl= {avg_ampl1}, vol_otnosh= {vol_otnosh}, MA3= {MA3}')
+                                f'{str(datetime.now())[8:19]}, {self.pair}, low= {low1}, MA3= {round(MA3,4)}, '
+                                f'ampl= {ampl1}, avg-ampl= {avg_ampl1}, '
+                                f' vol= {round(vol1,2)}, avg-vol={round(avg_vol1,2)}, vol_otnosh={vol_otnosh} ')
                         else:
                             logger.info(
-                            f'breakeven, '
-                            f'{str(datetime.now())[8:19]}, {self.pair} цена открытия= {price_buy}, vol= {vol1}, avg-vol={avg_vol1}, '
-                            f'ampl= {ampl1}, avg-ampl= {avg_ampl1}, vol_otnosh= {vol_otnosh}, MA3= {MA3}')
+                                f'breakeven, '
+                                f'{str(datetime.now())[8:19]}, {self.pair}, low= {low1}, MA3= {round(MA3,4)}, '
+                                f'ampl= {ampl1}, avg-ampl= {avg_ampl1}, '
+                                f' vol= {round(vol1,2)}, avg-vol={round(avg_vol1,2)}, vol_otnosh={vol_otnosh} ')
                         position = False
 
 
