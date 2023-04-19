@@ -43,7 +43,7 @@ class Strategy:
                     except ZeroDivisionError:
                         now_vol_diff = 1
                     now_high_low = round((float(data['k']['h']) - float(data['k']['l'])) * 100 / float(data['k']['h']),2)
-                    MA3 = statistics.mean(data_klines['data_low_ma'][:-1] + [float(data['k']['c'])])
+                    MA3 = statistics.mean(data_klines['data_low_ma'][:-1] + [float(data['k']['l'])])
                     if data['k']['x']:
 
                         """"""" Расчёт объёма """""""
@@ -61,7 +61,7 @@ class Strategy:
                         if a['position']:
                             price_breakeven = a['entry_price'] * (1 + now_high_low * 0.01)
                             price_take = a['entry_price'] * (1 + now_high_low * 0.02)
-                            price_stop= a['entry_price'] * (1 - now_high_low * 0.01)
+                            price_stop= max(a['entry_price'] * (1 - now_high_low * 0.01), a['entry_price']*0.995)
                             position = True
                             breakeven = False
                             avg_vol1 = average_volume
