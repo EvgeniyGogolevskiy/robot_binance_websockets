@@ -44,7 +44,6 @@ class Strategy:
                         now_vol_diff = 1
                     now_high_low = round((float(data['k']['h']) - float(data['k']['l'])) * 100 / float(data['k']['h']),2)
                     MA3 = statistics.mean(data_klines['data_close'][:-1] + [float(data['k']['c'])])
-                    telo = round((float(data['k']['o']) - float(data['k']['c'])) * 100 / float(data['k']['o']),2)
                     if data['k']['x']:
 
                         """"""" Расчёт объёма """""""
@@ -60,34 +59,44 @@ class Strategy:
                         price_buy = float(data['k']['c'])
                         a = buy_order(self.pair, self.dollars_for_order, price_buy)
                         if a['position']:
-                            price_take = a['entry_price'] * (1 + now_high_low * 0.006)
-                            price_stop= a['entry_price'] * (1 - now_high_low * 0.006)
+                            price_breakeven = a['entry_price'] * (1 + now_high_low * 0.01)
+                            price_take = a['entry_price'] * (1 + now_high_low * 0.02)
+                            price_stop= a['entry_price'] * (1 - now_high_low * 0.01)
                             position = True
+                            breakeven = False
                             avg_vol1 = average_volume
                             ampl1 = now_high_low
                             avg_ampl1 = data_klines['average_diff']
                             vol_otnosh = now_vol_diff
+                            vol1 = float(data['k']['q'])
                 while position:
                     data = json.loads(await client.recv())
                     if data['k']['x']:
                         list_volume = list_volume[1:] + [float(data['k']['q'])]
                         average_volume = statistics.median(list_volume)
                         data_klines = calculate_diff(data, data_klines['list_diff'], data_klines['data_close'])
+                    if not breakeven and float(data['k']['c']) >= price_breakeven:
+                        price_stop = price_buy * 1.001
+                        breakeven = True
                     if float(data['k']['c']) >= price_take:
                         sell_order(self.pair, a['amt'])
                         logger.info(
                             f'take_profit, '
-                            f'{str(datetime.now())[8:19]}, {self.pair} цена {data["k"]["c"]}, vol/avg-vol= {round(float(data["k"]["q"]) / avg_vol1, 2)},'
-                            f'ampl= {ampl1}, avg-ampl= {avg_ampl1}, vol_otnosh= {vol_otnosh},'
-                            f'MA3= {MA3 * (1 - now_high_low * 0.01)},')
+                            f'{str(datetime.now())[8:19]}, {self.pair} цена открытия= {price_buy}, vol= {vol1}, avg-vol={avg_vol1}'
+                            f'ampl= {ampl1}, avg-ampl= {avg_ampl1}, vol_otnosh= {vol_otnosh}, MA3= {MA3}')
                         position = False
                     if float(data['k']['c']) <= price_stop:
                         sell_order(self.pair, a['amt'])
-                        logger.info(
-                            f'stop_loss, '
-                            f'{str(datetime.now())[8:19]}, {self.pair} цена {data["k"]["c"]}, vol/avg-vol= {round(float(data["k"]["q"]) / average_volume, 2)},'
-                            f'ampl= {now_high_low}, avg-ampl= {data_klines["average_diff"]}, vol_otnosh= {now_vol_diff},'
-                            f'MA3= {MA3 * (1 - now_high_low * 0.01)},')
+                        if not breakeven:
+                            logger.info(
+                                f'stop_loss, '
+                                f'{str(datetime.now())[8:19]}, {self.pair} цена открытия= {price_buy}, vol= {vol1}, avg-vol={avg_vol1}'
+                                f'ampl= {ampl1}, avg-ampl= {avg_ampl1}, vol_otnosh= {vol_otnosh}, MA3= {MA3}')
+                        else:
+                            logger.info(
+                            f'breakeven, '
+                            f'{str(datetime.now())[8:19]}, {self.pair} цена открытия= {price_buy}, vol= {vol1}, avg-vol={avg_vol1}'
+                            f'ampl= {ampl1}, avg-ampl= {avg_ampl1}, vol_otnosh= {vol_otnosh}, MA3= {MA3}')
                         position = False
 
 
@@ -95,7 +104,7 @@ if __name__ == '__main__':
     loop = asyncio.get_event_loop()
     try:
         for pair in top_volatily():
-            adp = Strategy(pair, '1m', 300)
+            adp = Strategy(pair, '1m', 200)
             asyncio.ensure_future(adp.main())
         logger.info(f'start {datetime.now()}')
         loop.run_forever()
