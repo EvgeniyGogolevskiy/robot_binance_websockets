@@ -25,19 +25,19 @@ def calculate_diff_volume(data, list_volume_diff):
 def calculate_diff_first(data_5m):
     data_5m_high = list(data_5m[2][25:30])
     data_5m_low = list(data_5m[3][25:30])
-    data_close = list(map(float, data_5m[4][27:30]))
+    data_low_ma = list(map(float, data_5m[3][27:30]))
     list_diff = []
     for i in range(len(data_5m_high)):
         list_diff.append((float(data_5m_high[i]) - float(data_5m_low[i])) * 100 / float(data_5m_high[i]))
     average_diff = round(statistics.mean(list_diff),2)
-    a = {'list_diff': list_diff, 'average_diff': average_diff, 'data_close': data_close}
+    a = {'list_diff': list_diff, 'average_diff': average_diff, 'data_low_ma': data_low_ma}
     return a
 
 
-def calculate_diff(data, list_diff, data_5m_close):
+def calculate_diff(data, list_diff, data_low_ma):
     diff = (float(data['k']['h']) - float(data['k']['l'])) * 100 / float(data['k']['h'])
-    data_close = data_5m_close[1:] + [float(data['k']['c'])]
+    data_low_ma = data_low_ma[1:] + [float(data['k']['l'])]
     list_diff = list_diff[1:] + [diff]
     average_diff = round(statistics.mean(list_diff),2)
-    a = {'list_diff': list_diff, 'average_diff': average_diff, 'data_close': data_close}
+    a = {'list_diff': list_diff, 'average_diff': average_diff, 'data_low_ma': data_low_ma}
     return a

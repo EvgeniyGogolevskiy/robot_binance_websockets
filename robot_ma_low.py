@@ -43,7 +43,7 @@ class Strategy:
                     except ZeroDivisionError:
                         now_vol_diff = 1
                     now_high_low = round((float(data['k']['h']) - float(data['k']['l'])) * 100 / float(data['k']['h']),2)
-                    MA3 = statistics.mean(data_klines['data_close'][:-1] + [float(data['k']['c'])])
+                    MA3 = statistics.mean(data_klines['data_low_ma'][:-1] + [float(data['k']['c'])])
                     if data['k']['x']:
 
                         """"""" Расчёт объёма """""""
@@ -51,7 +51,7 @@ class Strategy:
                         average_volume = statistics.median(list_volume)
 
                         """"""" Расчёт волатильности """""""
-                        data_klines = calculate_diff(data, data_klines['list_diff'], data_klines['data_close'])
+                        data_klines = calculate_diff(data, data_klines['list_diff'], data_klines['data_low_ma'])
 
                         await asyncio.sleep(0.5)
 
@@ -59,9 +59,9 @@ class Strategy:
                         price_buy = float(data['k']['c'])
                         a = buy_order(self.pair, self.dollars_for_order, price_buy)
                         if a['position']:
-                            price_breakeven = a['entry_price'] * (1 + now_high_low * 0.01)
-                            price_take = a['entry_price'] * (1 + now_high_low * 0.02)
-                            price_stop= a['entry_price'] * (1 - now_high_low * 0.01)
+                            price_breakeven = max(a['entry_price'] * (1 + now_high_low * 0.01), a['entry_price']*1.005)
+                            price_take = max(a['entry_price'] * (1 + now_high_low * 0.02), a['entry_price']*1.02)
+                            price_stop= max(a['entry_price'] * (1 - now_high_low * 0.01), a['entry_price']*0.997)
                             position = True
                             breakeven = False
                             avg_vol1 = average_volume
@@ -74,7 +74,7 @@ class Strategy:
                     if data['k']['x']:
                         list_volume = list_volume[1:] + [float(data['k']['q'])]
                         average_volume = statistics.median(list_volume)
-                        data_klines = calculate_diff(data, data_klines['list_diff'], data_klines['data_close'])
+                        data_klines = calculate_diff(data, data_klines['list_diff'], data_klines['data_low_ma'])
                     if not breakeven and float(data['k']['c']) >= price_breakeven:
                         price_stop = price_buy * 1.001
                         breakeven = True
@@ -90,12 +90,12 @@ class Strategy:
                         if not breakeven:
                             logger.info(
                                 f'stop_loss, '
-                                f'{str(datetime.now())[8:19]}, {self.pair} цена открытия= {price_buy}, vol= {vol1}, avg-vol={avg_vol1}'
+                                f'{str(datetime.now())[8:19]}, {self.pair} цена открытия= {price_buy}, vol= {vol1}, avg-vol={avg_vol1}, '
                                 f'ampl= {ampl1}, avg-ampl= {avg_ampl1}, vol_otnosh= {vol_otnosh}, MA3= {MA3}')
                         else:
                             logger.info(
                             f'breakeven, '
-                            f'{str(datetime.now())[8:19]}, {self.pair} цена открытия= {price_buy}, vol= {vol1}, avg-vol={avg_vol1}'
+                            f'{str(datetime.now())[8:19]}, {self.pair} цена открытия= {price_buy}, vol= {vol1}, avg-vol={avg_vol1}, '
                             f'ampl= {ampl1}, avg-ampl= {avg_ampl1}, vol_otnosh= {vol_otnosh}, MA3= {MA3}')
                         position = False
 
@@ -104,7 +104,7 @@ if __name__ == '__main__':
     loop = asyncio.get_event_loop()
     try:
         for pair in top_volatily():
-            adp = Strategy(pair, '1m', 200)
+            adp = Strategy(pair, '1m', 250)
             asyncio.ensure_future(adp.main())
         logger.info(f'start {datetime.now()}')
         loop.run_forever()
