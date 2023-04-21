@@ -27,7 +27,7 @@ def analise_volume():
         time.sleep(0.2)
 
         try:
-            data = pd.DataFrame(CLIENT.futures_klines(symbol=cripto_pair, interval='5m', limit=500))
+            data = pd.DataFrame(CLIENT.futures_klines(symbol=cripto_pair, interval='1m', limit=500))
             volume_pair = data[7].astype(float).sum()
             list_pair_volume.append((cripto_pair, volume_pair))
         except Exception as error:
@@ -50,7 +50,7 @@ def top_volatily():
 
     for pair in pairs:
         try:
-            data = CLIENT.futures_klines(symbol=pair, interval='4h', limit=12)
+            data = CLIENT.futures_klines(symbol=pair, interval='1m', limit=500)
         except Exception as error:
             print(f"По паре {pair} не удалось скачать данные по свечам", error)
             continue
