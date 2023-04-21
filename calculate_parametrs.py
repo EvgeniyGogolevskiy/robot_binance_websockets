@@ -23,8 +23,8 @@ def calculate_diff_volume(data, list_volume_diff):
 
 
 def calculate_diff_first(data_5m):
-    data_5m_high = list(data_5m[2][10:30])
-    data_5m_low = list(data_5m[3][10:30])
+    data_5m_high = list(data_5m[2][:30])
+    data_5m_low = list(data_5m[3][:30])
     data_low_ma = list(map(float, data_5m[3][27:30]))
     list_diff = []
     for i in range(len(data_5m_high)):
