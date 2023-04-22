@@ -9,4 +9,5 @@ test1_corr.py
 /logdir
 test_log.py
 work_check.py
-config.py
+robot_ma_high_all.py
+

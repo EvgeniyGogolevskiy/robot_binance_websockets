@@ -42,9 +42,6 @@ class Strategy:
                         """"""" Расчёт волатильности и скользящей средней """""""
                         data_klines = calculate_diff(data, data_klines['list_diff'], data_klines['data_high_ma'])
                         MA2 = statistics.mean(data_klines['data_high_ma'])
-                        print(f"ampl= {data_klines['average_diff']}, MA2= {MA2}")
-
-                        await asyncio.sleep(0.5)
 
                     if float(data['k']['o']) <= float(data['k']['c']) < MA2*(1 - data_klines['average_diff'] * 0.03) and data_klines['average_diff'] > 0.19:
                         price_buy = float(data['k']['c'])
