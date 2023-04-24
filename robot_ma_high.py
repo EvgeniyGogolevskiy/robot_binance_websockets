@@ -43,21 +43,25 @@ class Strategy:
                         data_klines = calculate_diff(data, data_klines['list_diff'], data_klines['data_high_ma'])
                         MA2 = statistics.mean(data_klines['data_high_ma'])
 
-                    if float(data['k']['o']) <= float(data['k']['c']) < MA2*(1 - data_klines['average_diff'] * 0.04) and data_klines['average_diff'] > 0.19:
+                    if float(data['k']['o']) <= float(data['k']['c']) < MA2*(1 - data_klines['average_diff'] * 0.025) and data_klines['average_diff'] > 0.19:
                         price_buy = float(data['k']['c'])
                         a = buy_order(self.pair, self.dollars_for_order, price_buy)
                         if a['position']:
-                            price_take = min(a['entry_price'] * (1 + data_klines['average_diff'] * 0.02), a['entry_price']*1.01)
+                            price_take = min(a['entry_price'] * (1 + data_klines['average_diff'] * 0.03), a['entry_price']*1.01)
+                            price_traling = a['entry_price'] * (1 + data_klines['average_diff'] * 0.01)
                             price_stop= min(a['entry_price'] * (1 - data_klines['average_diff'] * 0.01), a['entry_price']*0.99)
                             position = True
                             avg_ampl1 = data_klines['average_diff']
                             MA = MA2
-                            porog = (MA*(1-avg_ampl1*0.04) - price_buy) * 100 / MA*(1-avg_ampl1*0.03)
+                            porog = (MA*(1-avg_ampl1*0.025) - price_buy) * 100 / MA*(1-avg_ampl1*0.025)
                 while position:
                     data = json.loads(await client.recv())
                     if data['k']['x']:
                         data_klines = calculate_diff(data, data_klines['list_diff'], data_klines['data_high_ma'])
                         MA2 = statistics.mean(data_klines['data_high_ma'])
+                    if float(data['k']['c']) >= price_traling:
+                        price_traling = price_traling * (1 + data_klines['average_diff'] * 0.01)
+                        price_stop = price_stop * (1 - data_klines['average_diff'] * 0.01)
                     if float(data['k']['c']) >= price_take:
                         sell_order(self.pair, a['amt'])
                         logger.info(
@@ -76,7 +80,7 @@ if __name__ == '__main__':
     loop = asyncio.get_event_loop()
     try:
         for pair in top_volatily():
-            adp = Strategy(pair, '1m', 600)
+            adp = Strategy(pair, '1m', 50)
             asyncio.ensure_future(adp.main())
         logger.info(f'start {datetime.now()}')
         loop.run_forever()
