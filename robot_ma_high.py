@@ -43,7 +43,7 @@ class Strategy:
                         data_klines = calculate_diff(data, data_klines['list_diff'], data_klines['data_high_ma'])
                         MA2 = statistics.mean(data_klines['data_high_ma'])
 
-                    if float(data['k']['o']) <= float(data['k']['c']) < MA2*(1 - data_klines['average_diff'] * 0.025) and data_klines['average_diff'] > 0.19:
+                    if float(data['k']['o']) <= float(data['k']['c']) < MA2*(1 - data_klines['average_diff'] * 0.03) and data_klines['average_diff'] > 0.19:
                         price_buy = float(data['k']['c'])
                         a = buy_order(self.pair, self.dollars_for_order, price_buy)
                         if a['position']:
@@ -53,7 +53,7 @@ class Strategy:
                             position = True
                             avg_ampl1 = data_klines['average_diff']
                             MA = MA2
-                            porog = (MA*(1-avg_ampl1*0.025) - price_buy) * 100 / MA*(1-avg_ampl1*0.025)
+                            porog = (MA*(1-avg_ampl1*0.03) - price_buy) * 100 / MA*(1-avg_ampl1*0.03)
                 while position:
                     data = json.loads(await client.recv())
                     if data['k']['x']:
@@ -61,7 +61,7 @@ class Strategy:
                         MA2 = statistics.mean(data_klines['data_high_ma'])
                     if float(data['k']['c']) >= price_traling:
                         price_traling = price_traling * (1 + data_klines['average_diff'] * 0.01)
-                        price_stop = price_stop * (1 - data_klines['average_diff'] * 0.01)
+                        price_stop = price_stop * (1 + data_klines['average_diff'] * 0.01)
                     if float(data['k']['c']) >= price_take:
                         sell_order(self.pair, a['amt'])
                         logger.info(
