@@ -9,3 +9,4 @@ test1_corr.py
 /logdir
 test_log.py
 work_check.py
+config.py
