@@ -26,7 +26,7 @@ class Strategy:
     def __init__(self, pair, interval, dollars):
         self.pair = pair
         self.interval = interval
-        self.data_5m = pd.DataFrame(CLIENT.futures_klines(symbol=self.pair, interval=self.interval, limit=30))
+        self.data_5m = pd.DataFrame(CLIENT.futures_klines(symbol=self.pair, interval=self.interval, limit=100))
         self.dollars_for_order = dollars
 
     async def main(self):

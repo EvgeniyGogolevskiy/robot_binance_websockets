@@ -23,9 +23,9 @@ def calculate_diff_volume(data, list_volume_diff):
 
 
 def calculate_diff_first(data_5m):
-    data_5m_high = list(data_5m[2][20:30])
-    data_5m_low = list(data_5m[3][20:30])
-    data_high_ma = list(map(float, data_5m[2][28:30]))
+    data_5m_high = list(data_5m[2][90:100])
+    data_5m_low = list(data_5m[3][90:100])
+    data_high_ma = list(map(float, data_5m[2][98:100]))
     list_diff = []
     for i in range(len(data_5m_high)):
         list_diff.append((float(data_5m_high[i]) - float(data_5m_low[i])) * 100 / float(data_5m_high[i]))
