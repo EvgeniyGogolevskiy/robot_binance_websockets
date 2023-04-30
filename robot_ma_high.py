@@ -75,14 +75,12 @@ class Strategy:
                             f'take_profit, {str(datetime.now())[8:19]}, {self.pair}, buy= {price_buy}, '
                             f'MA2= {round(MA, 4)}, avg-ampl= {avg_ampl1}, rsi={rsi10}, porog= {round(porog, 4)}')
                         position = False
-                        continue
                     if float(data['k']['c']) <= price_stop:
                         sell_order(self.pair, a['amt'])
                         logger.info(
                             f'stop_loss and traling({traling}), {str(datetime.now())[8:19]}, {self.pair}, buy= {price_buy}, '
                             f'MA2= {round(MA, 4)}, avg-ampl= {avg_ampl1}, rsi={rsi10}, porog= {round(porog, 4)}')
                         position = False
-                        continue
                     if float(data['k']['c']) >= price_traling:
                         price_traling = price_traling * (1 + data_klines['average_diff'] * 0.01)
                         price_stop = max(price_stop * (1 + data_klines['average_diff'] * 0.01), price_stop*1.005)
