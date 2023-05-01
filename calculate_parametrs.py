@@ -2,8 +2,8 @@ import statistics
 
 
 def calculate_volume_diff_first(data_5m):
-    data_5m_volume_buy = list(data_5m[10][19:29])
-    data_5m_volume = list(data_5m[7][19:29])
+    data_5m_volume_buy = list(data_5m[10][89:99])
+    data_5m_volume = list(data_5m[7][89:99])
     list_volume_diff = []
     for i in range(len(data_5m_volume)):
         volume_sell = float(data_5m_volume[i]) - float(data_5m_volume_buy[i])
