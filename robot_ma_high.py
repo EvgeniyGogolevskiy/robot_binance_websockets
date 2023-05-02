@@ -26,13 +26,13 @@ class Strategy:
     def __init__(self, pair, interval, dollars):
         self.pair = pair
         self.interval = interval
-        self.data_5m = pd.DataFrame(CLIENT.futures_klines(symbol=self.pair, interval=self.interval, limit=100))
+        self.data_5m = pd.DataFrame(CLIENT.futures_klines(symbol=self.pair, interval=self.interval, limit=300))
         self.dollars_for_order = dollars
 
     async def main(self):
         data_klines = calculate_diff_first(self.data_5m)
         MA2 = statistics.mean(data_klines['data_high_ma'])
-        data_rsi = self.data_5m[3][:100].astype(float)
+        data_rsi = self.data_5m[3][:300].astype(float)
         position = False
         url = f'wss://fstream.binance.com/ws/{self.pair.lower()}@kline_{self.interval}'
         async with websockets.connect(url) as client:
@@ -46,7 +46,7 @@ class Strategy:
                         MA2 = statistics.mean(data_klines['data_high_ma'])
 
                         """"""" Расчёт индикатора RSI """""""
-                        data_rsi = data_rsi[1:99].append(pd.Series([float(data['k']['c'])]))
+                        data_rsi = data_rsi[1:299].append(pd.Series([float(data['k']['c'])]))
                         rsi = list(ta.rsi(data_rsi, length=10))[-1]
 
                     if float(data['k']['o']) <= float(data['k']['c']) < MA2*(1 - data_klines['average_diff'] * 0.03) and data_klines['average_diff'] > 0.19 and rsi < 13:
@@ -67,7 +67,7 @@ class Strategy:
                     if data['k']['x']:
                         data_klines = calculate_diff(data, data_klines['list_diff'], data_klines['data_high_ma'])
                         MA2 = statistics.mean(data_klines['data_high_ma'])
-                        data_rsi = data_rsi[1:99].append(pd.Series([float(data['k']['c'])]))
+                        data_rsi = data_rsi[1:299].append(pd.Series([float(data['k']['c'])]))
                         rsi = list(ta.rsi(data_rsi, length=10))[-1]
                     if float(data['k']['c']) >= price_take:
                         sell_order(self.pair, a['amt'])
@@ -93,7 +93,7 @@ if __name__ == '__main__':
     loop = asyncio.get_event_loop()
     try:
         for pair in top_volatily():
-            adp = Strategy(pair, '1m', 200)
+            adp = Strategy(pair, '1m', 300)
             asyncio.ensure_future(adp.main())
         logger.info(f'start {datetime.now()}')
         loop.run_forever()
