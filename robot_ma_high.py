@@ -49,15 +49,17 @@ class Strategy:
                         data_rsi = data_rsi[1:299].append(pd.Series([float(data['k']['c'])]))
                         rsi = list(ta.rsi(data_rsi, length=10))[-1]
 
-                    if float(data['k']['o']) <= float(data['k']['c']) < MA2*(1 - data_klines['average_diff'] * 0.03) and data_klines['average_diff'] > 0.19 and rsi < 13:
+                    if float(data['k']['o']) <= float(data['k']['c']) < MA2*(1 - data_klines['average_diff'] * 0.03) and data_klines['average_diff'] > 0.19 and rsi < 20:
                         price_buy = float(data['k']['c'])
                         a = buy_order(self.pair, self.dollars_for_order, price_buy)
                         if a['position']:
                             price_take = min(a['entry_price'] * (1 + data_klines['average_diff'] * 0.03), a['entry_price']*1.01)
-                            price_traling = a['entry_price'] * (1 + data_klines['average_diff'] * 0.01)
+                            price_take1 = a['entry_price'] * (1 + data_klines['average_diff'] * 0.01)
+                            price_take2 = a['entry_price'] * (1 + data_klines['average_diff'] * 0.02)
                             price_stop= min(a['entry_price'] * (1 - data_klines['average_diff'] * 0.01), a['entry_price']*0.99)
                             position = True
-                            traling = False
+                            take1 = False
+                            take2 = False
                             avg_ampl1 = data_klines['average_diff']
                             MA = MA2
                             rsi10 = rsi
@@ -69,24 +71,24 @@ class Strategy:
                         MA2 = statistics.mean(data_klines['data_high_ma'])
                         data_rsi = data_rsi[1:299].append(pd.Series([float(data['k']['c'])]))
                         rsi = list(ta.rsi(data_rsi, length=10))[-1]
+                    if float(data['k']['c']) >= price_take1 and not take1:
+                        a = sell_order(self.pair, a['amt']/3)
+                        take1 = True
+                    if float(data['k']['c']) >= price_take2 and not take2:
+                        a = sell_order(self.pair, a['amt']/2)
+                        take2 = True
                     if float(data['k']['c']) >= price_take:
                         sell_order(self.pair, a['amt'])
                         logger.info(
-                            f'take_profit, {str(datetime.now())[8:19]}, {self.pair}, buy= {price_buy}, '
+                            f'take_profit and take1={take1} and take2={take2}, {str(datetime.now())[8:19]}, {self.pair}, buy= {price_buy}, '
                             f'MA2= {round(MA, 4)}, avg-ampl= {avg_ampl1}, rsi={rsi10}, porog= {round(porog, 4)}')
                         position = False
-                        continue
                     if float(data['k']['c']) <= price_stop:
                         sell_order(self.pair, a['amt'])
                         logger.info(
-                            f'stop_loss and traling({traling}), {str(datetime.now())[8:19]}, {self.pair}, buy= {price_buy}, '
+                            f'stop_loss, {str(datetime.now())[8:19]}, {self.pair}, buy= {price_buy}, '
                             f'MA2= {round(MA, 4)}, avg-ampl= {avg_ampl1}, rsi={rsi10}, porog= {round(porog, 4)}')
                         position = False
-                        continue
-                    if float(data['k']['c']) >= price_traling:
-                        price_traling = price_traling * (1 + data_klines['average_diff'] * 0.01)
-                        price_stop = max(price_stop * (1 + data_klines['average_diff'] * 0.01), price_stop*1.005)
-                        traling = True
 
 
 if __name__ == '__main__':
