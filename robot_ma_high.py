@@ -49,7 +49,7 @@ class Strategy:
                         data_rsi = data_rsi[1:299].append(pd.Series([float(data['k']['c'])]))
                         rsi = list(ta.rsi(data_rsi, length=10))[-1]
 
-                    if float(data['k']['o']) <= float(data['k']['c']) < MA2*(1 - data_klines['average_diff'] * 0.03) and data_klines['average_diff'] > 0.19 and rsi < 20:
+                    if float(data['k']['o']) <= float(data['k']['c']) < MA2*(1 - data_klines['average_diff'] * 0.03) and data_klines['average_diff'] > 0.19 and rsi < 100:
                         price_buy = float(data['k']['c'])
                         a = buy_order(self.pair, self.dollars_for_order, price_buy)
                         if a['position']:
