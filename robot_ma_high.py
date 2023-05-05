@@ -49,7 +49,7 @@ class Strategy:
                         data_rsi = data_rsi[1:299].append(pd.Series([float(data['k']['c'])]))
                         rsi = list(ta.rsi(data_rsi, length=10))[-1]
 
-                    if float(data['k']['o']) <= float(data['k']['c']) < MA2*(1 - data_klines['average_diff'] * 0.03) and data_klines['average_diff'] > 0.19 and rsi < 100:
+                    if float(data['k']['o']) <= float(data['k']['c']) < MA2*(1 - data_klines['average_diff'] * 0.02) and data_klines['average_diff'] > 0.19 and rsi < 12:
                         price_buy = float(data['k']['c'])
                         a = buy_order(self.pair, self.dollars_for_order, price_buy)
                         if a['position']:
@@ -63,7 +63,7 @@ class Strategy:
                             avg_ampl1 = data_klines['average_diff']
                             MA = MA2
                             rsi10 = rsi
-                            porog = (MA*(1-avg_ampl1*0.03) - price_buy) * 100 / MA*(1-avg_ampl1*0.03)
+                            porog = (MA*(1-avg_ampl1*0.02) - price_buy) * 100 / MA*(1-avg_ampl1*0.02)
                 while position:
                     data = json.loads(await client.recv())
                     if data['k']['x']:
@@ -72,10 +72,10 @@ class Strategy:
                         data_rsi = data_rsi[1:299].append(pd.Series([float(data['k']['c'])]))
                         rsi = list(ta.rsi(data_rsi, length=10))[-1]
                     if float(data['k']['c']) >= price_take1 and not take1:
-                        a = sell_order(self.pair, a['amt']/3)
+                        a = sell_order(self.pair, a['amt']//3)
                         take1 = True
                     if float(data['k']['c']) >= price_take2 and not take2:
-                        a = sell_order(self.pair, a['amt']/2)
+                        a = sell_order(self.pair, a['amt']//2)
                         take2 = True
                     if float(data['k']['c']) >= price_take:
                         sell_order(self.pair, a['amt'])
@@ -95,7 +95,7 @@ if __name__ == '__main__':
     loop = asyncio.get_event_loop()
     try:
         for pair in top_volatily():
-            adp = Strategy(pair, '1m', 300)
+            adp = Strategy(pair, '1m', 100)
             asyncio.ensure_future(adp.main())
         logger.info(f'start {datetime.now()}')
         loop.run_forever()
