@@ -50,7 +50,7 @@ def top_volatily():
 
     for pair in pairs:
         try:
-            data = CLIENT.futures_klines(symbol=pair, interval='1h', limit=100)
+            data = CLIENT.futures_klines(symbol=pair, interval='1m', limit=500)
         except Exception as error:
             print(f"По паре {pair} не удалось скачать данные по свечам", error)
             continue
