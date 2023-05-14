@@ -64,7 +64,7 @@ class Strategy:
                                 amplituda1 = amplituda
                                 volume1 = volume
                                 vol_otnosh1 = vol_otnosh
-                                logger.info(f'{side}, {str(datetime.now())[8:19]}, entry={a["entry_price"]}, take={price_take}, stop={price_stop}')
+                                logger.info(f'{side}, {str(datetime.now())[8:19]}, entry={a["entry_price"]}, take={price_take}, stop={price_stop}, amt={a["amt"]}')
                         elif float(data['k']['c']) > float(data['k']['o'])*1.001:
                             price_buy = float(data['k']['c'])
                             a = sell_order(self.pair, self.dollars_for_order, price_buy)
@@ -78,8 +78,7 @@ class Strategy:
                                 amplituda1 = amplituda
                                 volume1 = volume
                                 vol_otnosh1 = vol_otnosh
-                                logger.info(
-                                    f'{side}, {str(datetime.now())[8:19]}, entry={a["entry_price"]}, take={price_take}, stop={price_stop}')
+                                logger.info(f'{side}, {str(datetime.now())[8:19]}, entry={a["entry_price"]}, take={price_take}, stop={price_stop}, amt={a["amt"]}')
                 while position:
                     data = json.loads(await client.recv())
                     if data['k']['x']:
@@ -103,13 +102,13 @@ class Strategy:
                             position = False
                     if side == 'sell':
                         if float(data['k']['c']) <= price_take:
-                            close_sell_order(self.pair, a['amt'])
+                            close_sell_order(self.pair, abs(a['amt']))
                             logger.info(
                                 f'take_profit, {str(datetime.now())[8:19]}, {self.pair}, buy= {price_buy}, '
                                 f'amplituda= {amplituda1}, avg-ampl= {avg_ampl1}, volume={volume1}, avg-vol= {avg_vol1}, vol_otnosh={vol_otnosh1}')
                             position = False
                         if float(data['k']['c']) >= price_stop:
-                            close_sell_order(self.pair, a['amt'])
+                            close_sell_order(self.pair, abs(a['amt']))
                             logger.info(
                                 f'stop_loss, {str(datetime.now())[8:19]}, {self.pair}, buy= {price_buy}, '
                                 f'amplituda= {amplituda1}, avg-ampl= {avg_ampl1}, volume={volume1}, avg-vol= {avg_vol1}, vol_otnosh={vol_otnosh1}')
