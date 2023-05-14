@@ -36,10 +36,35 @@ def buy_order(pair, depo, price_buy):
         return a
 
 
-def sell_order(pair, lot):
+def sell_order(pair, depo, price_buy):
+    lot = size_lot(depo, price_buy)
+    try:
+        CLIENT.futures_create_order(symbol=pair, side='SELL', type='MARKET', quantity=lot)
+        info = CLIENT.futures_position_information(symbol=pair)
+        a = {'entry_price': float(info[0]['entryPrice']), 'amt': float(info[0]['positionAmt']), 'position': True}
+        return a
+    except Exception as error:
+        print(f' {datetime.now}, {pair}, {error}')
+        a = {'position': False}
+        return a
+
+
+def close_buy_order(pair, lot):
     while True:
         try:
             CLIENT.futures_create_order(symbol=pair, side='SELL', type='MARKET', quantity=lot)
+            info = CLIENT.futures_position_information(symbol=pair)
+            a = {'entry_price': float(info[0]['entryPrice']), 'amt': float(info[0]['positionAmt'])}
+            return a
+        except Exception as error:
+            print(f' {datetime.now}, {pair}, {error}')
+            time.sleep(0.1)
+
+
+def close_sell_order(pair, lot):
+    while True:
+        try:
+            CLIENT.futures_create_order(symbol=pair, side='BUY', type='MARKET', quantity=lot)
             info = CLIENT.futures_position_information(symbol=pair)
             a = {'entry_price': float(info[0]['entryPrice']), 'amt': float(info[0]['positionAmt'])}
             return a

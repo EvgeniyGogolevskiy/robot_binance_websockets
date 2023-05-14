@@ -1,14 +1,12 @@
-import statistics
 from datetime import datetime
 import websockets
 import asyncio
 import json
 from binance.client import Client
 import pandas as pd
-import pandas_ta as ta
 from config import api, secret
 from calculate_parametrs import calculate_diff_first, calculate_diff, calculate_volume_diff_first, calculate_diff_volume
-from create_order import buy_order, sell_order
+from create_order import buy_order, sell_order, close_sell_order, close_buy_order
 from find_volatily_pairs import top_volatily
 import logging
 import sys
@@ -31,7 +29,10 @@ class Strategy:
 
     async def main(self):
         data_klines = calculate_diff_first(self.data_5m)
+        amplituda = data_klines['list_diff'][-1]
         data_volume = calculate_volume_diff_first(self.data_5m)
+        volume = data_volume['list_volume'][-1]
+        vol_otnosh = data_volume['list_volume_diff'][-1]
         position = False
         url = f'wss://fstream.binance.com/ws/{self.pair.lower()}@kline_{self.interval}'
         async with websockets.connect(url) as client:
@@ -47,19 +48,35 @@ class Strategy:
                         """"""" Расчёт объёма """""""
                         data_volume = calculate_diff_volume(data, data_volume['list_volume'], data_volume['list_volume_diff'])
                         volume = data_volume['list_volume'][-1]
-                        avg_volume = statistics.mean(data_volume['list_volume'])
+                        vol_otnosh = data_volume['list_volume_diff'][-1]
 
-                    if amplituda > data_klines['average_diff']*5 and float(data['k']['o']) > float(data['k']['c'])*1.001:
-                        price_buy = float(data['k']['c'])
-                        a = buy_order(self.pair, self.dollars_for_order, price_buy)
-                        if a['position']:
-                            price_take = a['entry_price'] * 1.001
-                            price_stop= a['entry_price'] * 0.999
-                            position = True
-                            avg_ampl1 = data_klines['average_diff']
-                            avg_vol1 = avg_volume
-                            amplituda1 = amplituda
-                            volume1 = volume
+                    if amplituda > data_klines['average_diff']*5:
+                        if float(data['k']['o']) > float(data['k']['c'])*1.001:
+                            price_buy = float(data['k']['c'])
+                            a = buy_order(self.pair, self.dollars_for_order, price_buy)
+                            if a['position']:
+                                price_take = a['entry_price'] * (1 + amplituda * 0.0025)
+                                price_stop = a['entry_price'] * (1 - amplituda * 0.0025)
+                                position = True
+                                side = 'buy'
+                                avg_ampl1 = data_klines['average_diff']
+                                avg_vol1 = data_volume['average_vol']
+                                amplituda1 = amplituda
+                                volume1 = volume
+                                vol_otnosh1 = vol_otnosh
+                        elif float(data['k']['c']) > float(data['k']['o'])*1.001:
+                            price_buy = float(data['k']['c'])
+                            a = sell_order(self.pair, self.dollars_for_order, price_buy)
+                            if a['position']:
+                                price_take = a['entry_price'] * (1 - amplituda * 0.0025)
+                                price_stop = a['entry_price'] * (1 + amplituda * 0.0025)
+                                position = True
+                                side = 'sell'
+                                avg_ampl1 = data_klines['average_diff']
+                                avg_vol1 = data_volume['average_vol']
+                                amplituda1 = amplituda
+                                volume1 = volume
+                                vol_otnosh1 = vol_otnosh
                 while position:
                     data = json.loads(await client.recv())
                     if data['k']['x']:
@@ -67,21 +84,33 @@ class Strategy:
                         amplituda = data_klines['list_diff'][-1]
                         data_volume = calculate_diff_volume(data, data_volume['list_volume'], data_volume['list_volume_diff'])
                         volume = data_volume['list_volume'][-1]
-                        avg_volume = statistics.mean(data_volume['list_volume'])
-                    if float(data['k']['c']) >= price_take:
-                        sell_order(self.pair, a['amt'])
-                        logger.info(
-                            f'take_profit, {str(datetime.now())[8:19]}, {self.pair}, buy= {price_buy}, '
-                            f'amplituda= {amplituda1}, avg-ampl= {avg_ampl1}, volume={volume1}, avg-vol= {avg_vol1}')
-                        position = False
-                    if float(data['k']['c']) <= price_stop:
-                        sell_order(self.pair, a['amt'])
-                        logger.info(
-                            f'stop_loss, {str(datetime.now())[8:19]}, {self.pair}, buy= {price_buy}, '
-                            f'amplituda= {amplituda1}, avg-ampl= {avg_ampl1}, volume={volume1}, avg-vol= {avg_vol1}')
-                        position = False
-
-                        """"""" СДЕЛАТЬ ТАК ЧТОБ АМПЛИТУДА И ОБЪЁМ ПОСЛЕДНЕЙ СВЕЧИ НЕ ВХОДИЛИ В РАСЧЕТ СРЕДНИХ """""""
+                        vol_otnosh = data_volume['list_volume_diff'][-1]
+                    if side == 'buy':
+                        if float(data['k']['c']) >= price_take:
+                            close_buy_order(self.pair, a['amt'])
+                            logger.info(
+                                f'take_profit, {str(datetime.now())[8:19]}, {self.pair}, buy= {price_buy}, '
+                                f'amplituda= {amplituda1}, avg-ampl= {avg_ampl1}, volume={volume1}, avg-vol= {avg_vol1}, vol_otnosh={vol_otnosh1}')
+                            position = False
+                        if float(data['k']['c']) <= price_stop:
+                            close_buy_order(self.pair, a['amt'])
+                            logger.info(
+                                f'stop_loss, {str(datetime.now())[8:19]}, {self.pair}, buy= {price_buy}, '
+                                f'amplituda= {amplituda1}, avg-ampl= {avg_ampl1}, volume={volume1}, avg-vol= {avg_vol1}, vol_otnosh={vol_otnosh1}')
+                            position = False
+                    if side == 'sell':
+                        if float(data['k']['c']) <= price_take:
+                            close_sell_order(self.pair, a['amt'])
+                            logger.info(
+                                f'take_profit, {str(datetime.now())[8:19]}, {self.pair}, buy= {price_buy}, '
+                                f'amplituda= {amplituda1}, avg-ampl= {avg_ampl1}, volume={volume1}, avg-vol= {avg_vol1}, vol_otnosh={vol_otnosh1}')
+                            position = False
+                        if float(data['k']['c']) >= price_stop:
+                            close_sell_order(self.pair, a['amt'])
+                            logger.info(
+                                f'stop_loss, {str(datetime.now())[8:19]}, {self.pair}, buy= {price_buy}, '
+                                f'amplituda= {amplituda1}, avg-ampl= {avg_ampl1}, volume={volume1}, avg-vol= {avg_vol1}, vol_otnosh={vol_otnosh1}')
+                            position = False
 
 
 if __name__ == '__main__':
