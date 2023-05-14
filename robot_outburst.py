@@ -64,7 +64,6 @@ class Strategy:
                                 amplituda1 = amplituda
                                 volume1 = volume
                                 vol_otnosh1 = vol_otnosh
-                                logger.info(f'{side}, {str(datetime.now())[8:19]}, entry={a["entry_price"]}, take={price_take}, stop={price_stop}, amt={a["amt"]}')
                         elif float(data['k']['c']) > float(data['k']['o'])*1.001:
                             price_buy = float(data['k']['c'])
                             a = sell_order(self.pair, self.dollars_for_order, price_buy)
@@ -78,7 +77,6 @@ class Strategy:
                                 amplituda1 = amplituda
                                 volume1 = volume
                                 vol_otnosh1 = vol_otnosh
-                                logger.info(f'{side}, {str(datetime.now())[8:19]}, entry={a["entry_price"]}, take={price_take}, stop={price_stop}, amt={a["amt"]}')
                 while position:
                     data = json.loads(await client.recv())
                     if data['k']['x']:
@@ -91,27 +89,27 @@ class Strategy:
                         if float(data['k']['c']) >= price_take:
                             close_buy_order(self.pair, a['amt'])
                             logger.info(
-                                f'take_profit, {str(datetime.now())[8:19]}, {self.pair}, buy= {price_buy}, '
-                                f'amplituda= {amplituda1}, avg-ampl= {avg_ampl1}, volume={volume1}, avg-vol= {avg_vol1}, vol_otnosh={vol_otnosh1}')
+                                f'take_profit, {str(datetime.now())[8:19]}, {self.pair}, amplituda= {round(amplituda1, 2)}'
+                                f'avg_ampl= {avg_ampl1},ampl_otnosh={round(amplituda1/avg_ampl1, 2)} vol_otnosh={round(volume1/avg_vol1, 2)}, vol_buy_sell={vol_otnosh1}')
                             position = False
                         if float(data['k']['c']) <= price_stop:
                             close_buy_order(self.pair, a['amt'])
                             logger.info(
-                                f'stop_loss, {str(datetime.now())[8:19]}, {self.pair}, buy= {price_buy}, '
-                                f'amplituda= {amplituda1}, avg-ampl= {avg_ampl1}, volume={volume1}, avg-vol= {avg_vol1}, vol_otnosh={vol_otnosh1}')
+                                f'stop_loss, {str(datetime.now())[8:19]}, {self.pair}, amplituda= {round(amplituda1, 2)}'
+                                f'avg_ampl= {avg_ampl1},ampl_otnosh={round(amplituda1 / avg_ampl1, 2)} vol_otnosh={round(volume1 / avg_vol1, 2)}, vol_buy_sell={vol_otnosh1}')
                             position = False
                     if side == 'sell':
                         if float(data['k']['c']) <= price_take:
                             close_sell_order(self.pair, abs(a['amt']))
                             logger.info(
-                                f'take_profit, {str(datetime.now())[8:19]}, {self.pair}, buy= {price_buy}, '
-                                f'amplituda= {amplituda1}, avg-ampl= {avg_ampl1}, volume={volume1}, avg-vol= {avg_vol1}, vol_otnosh={vol_otnosh1}')
+                                f'take_profit, {str(datetime.now())[8:19]}, {self.pair}, amplituda= {round(amplituda1, 2)}'
+                                f'avg_ampl= {avg_ampl1},ampl_otnosh={round(amplituda1 / avg_ampl1, 2)} vol_otnosh={round(volume1 / avg_vol1, 2)}, vol_buy_sell={vol_otnosh1}')
                             position = False
                         if float(data['k']['c']) >= price_stop:
                             close_sell_order(self.pair, abs(a['amt']))
                             logger.info(
-                                f'stop_loss, {str(datetime.now())[8:19]}, {self.pair}, buy= {price_buy}, '
-                                f'amplituda= {amplituda1}, avg-ampl= {avg_ampl1}, volume={volume1}, avg-vol= {avg_vol1}, vol_otnosh={vol_otnosh1}')
+                                f'stop_loss, {str(datetime.now())[8:19]}, {self.pair}, amplituda= {round(amplituda1, 2)}'
+                                f'avg_ampl= {avg_ampl1},ampl_otnosh={round(amplituda1 / avg_ampl1, 2)} vol_otnosh={round(volume1 / avg_vol1, 2)}, vol_buy_sell={vol_otnosh1}')
                             position = False
 
 
