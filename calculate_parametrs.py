@@ -8,7 +8,10 @@ def calculate_volume_diff_first(data_5m):
     list_volume = []
     for i in range(len(data_5m_volume)):
         volume_sell = float(data_5m_volume[i]) - float(data_5m_volume_buy[i])
-        volume_diff = float(data_5m_volume_buy[i]) / volume_sell
+        try:
+            volume_diff = float(data_5m_volume_buy[i]) / volume_sell
+        except ZeroDivisionError:
+            volume_diff = 1
         list_volume_diff.append(volume_diff)
         list_volume.append(float(data_5m_volume[i]))
     average_vol = round(statistics.mean(list_volume[:-1]), 2)

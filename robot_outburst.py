@@ -64,6 +64,7 @@ class Strategy:
                                 amplituda1 = amplituda
                                 volume1 = volume
                                 vol_otnosh1 = vol_otnosh
+                                logger.info(f'{side}, {str(datetime.now())[8:19]}, entry={a["entry_price"]}, take={price_take}, stop={price_stop}')
                         elif float(data['k']['c']) > float(data['k']['o'])*1.001:
                             price_buy = float(data['k']['c'])
                             a = sell_order(self.pair, self.dollars_for_order, price_buy)
@@ -77,6 +78,8 @@ class Strategy:
                                 amplituda1 = amplituda
                                 volume1 = volume
                                 vol_otnosh1 = vol_otnosh
+                                logger.info(
+                                    f'{side}, {str(datetime.now())[8:19]}, entry={a["entry_price"]}, take={price_take}, stop={price_stop}')
                 while position:
                     data = json.loads(await client.recv())
                     if data['k']['x']:
