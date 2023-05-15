@@ -34,12 +34,14 @@ class Strategy:
         volume = data_volume['list_volume'][-1]
         vol_otnosh = data_volume['list_volume_diff'][-1]
         position = False
+        flag = False
         url = f'wss://fstream.binance.com/ws/{self.pair.lower()}@kline_{self.interval}'
         async with websockets.connect(url) as client:
             while True:
                 while not position:
                     data = json.loads(await client.recv())
                     if data['k']['x']:
+                        flag = True
 
                         """"""" Расчёт волатильности """""""
                         data_klines = calculate_diff(data, data_klines['list_diff'], data_klines['data_high_ma'])
@@ -50,7 +52,7 @@ class Strategy:
                         volume = data_volume['list_volume'][-1]
                         vol_otnosh = data_volume['list_volume_diff'][-1]
 
-                    if amplituda > data_klines['average_diff']*5 > 0.9:
+                    if amplituda > data_klines['average_diff']*5 > 0.9 and flag:
                         if float(data['k']['o']) > float(data['k']['c'])*1.001:
                             price_buy = float(data['k']['c'])
                             a = buy_order(self.pair, self.dollars_for_order, price_buy)
@@ -92,14 +94,14 @@ class Strategy:
                                 f'take_profit, {str(datetime.now())[8:19]}, {self.pair}, amplituda= {round(amplituda1, 2)}'
                                 f'avg_ampl= {avg_ampl1},ampl_otnosh={round(amplituda1/avg_ampl1, 2)} vol_otnosh={round(volume1/avg_vol1, 2)}, vol_buy_sell={vol_otnosh1}')
                             position = False
-                            await asyncio.sleep(60)
+                            flag = False
                         if float(data['k']['c']) <= price_stop:
                             close_buy_order(self.pair, a['amt'])
                             logger.info(
                                 f'stop_loss, {str(datetime.now())[8:19]}, {self.pair}, amplituda= {round(amplituda1, 2)}'
                                 f'avg_ampl= {avg_ampl1},ampl_otnosh={round(amplituda1 / avg_ampl1, 2)} vol_otnosh={round(volume1 / avg_vol1, 2)}, vol_buy_sell={vol_otnosh1}')
                             position = False
-                            await asyncio.sleep(60)
+                            flag = False
                     if side == 'sell':
                         if float(data['k']['c']) <= price_take:
                             close_sell_order(self.pair, abs(a['amt']))
@@ -107,21 +109,21 @@ class Strategy:
                                 f'take_profit, {str(datetime.now())[8:19]}, {self.pair}, amplituda= {round(amplituda1, 2)}'
                                 f'avg_ampl= {avg_ampl1},ampl_otnosh={round(amplituda1 / avg_ampl1, 2)} vol_otnosh={round(volume1 / avg_vol1, 2)}, vol_buy_sell={vol_otnosh1}')
                             position = False
-                            await asyncio.sleep(60)
+                            flag = False
                         if float(data['k']['c']) >= price_stop:
                             close_sell_order(self.pair, abs(a['amt']))
                             logger.info(
                                 f'stop_loss, {str(datetime.now())[8:19]}, {self.pair}, amplituda= {round(amplituda1, 2)}'
                                 f'avg_ampl= {avg_ampl1},ampl_otnosh={round(amplituda1 / avg_ampl1, 2)} vol_otnosh={round(volume1 / avg_vol1, 2)}, vol_buy_sell={vol_otnosh1}')
                             position = False
-                            await asyncio.sleep(60)
+                            flag = False
 
 
 if __name__ == '__main__':
     loop = asyncio.get_event_loop()
     try:
         for pair in top_volatily():
-            adp = Strategy(pair, '1m', 40)
+            adp = Strategy(pair, '1m', 30)
             asyncio.ensure_future(adp.main())
         logger.info(f'start {datetime.now()}')
         loop.run_forever()
