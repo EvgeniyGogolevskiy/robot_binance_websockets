@@ -92,12 +92,14 @@ class Strategy:
                                 f'take_profit, {str(datetime.now())[8:19]}, {self.pair}, amplituda= {round(amplituda1, 2)}'
                                 f'avg_ampl= {avg_ampl1},ampl_otnosh={round(amplituda1/avg_ampl1, 2)} vol_otnosh={round(volume1/avg_vol1, 2)}, vol_buy_sell={vol_otnosh1}')
                             position = False
+                            await asyncio.sleep(60)
                         if float(data['k']['c']) <= price_stop:
                             close_buy_order(self.pair, a['amt'])
                             logger.info(
                                 f'stop_loss, {str(datetime.now())[8:19]}, {self.pair}, amplituda= {round(amplituda1, 2)}'
                                 f'avg_ampl= {avg_ampl1},ampl_otnosh={round(amplituda1 / avg_ampl1, 2)} vol_otnosh={round(volume1 / avg_vol1, 2)}, vol_buy_sell={vol_otnosh1}')
                             position = False
+                            await asyncio.sleep(60)
                     if side == 'sell':
                         if float(data['k']['c']) <= price_take:
                             close_sell_order(self.pair, abs(a['amt']))
@@ -105,12 +107,14 @@ class Strategy:
                                 f'take_profit, {str(datetime.now())[8:19]}, {self.pair}, amplituda= {round(amplituda1, 2)}'
                                 f'avg_ampl= {avg_ampl1},ampl_otnosh={round(amplituda1 / avg_ampl1, 2)} vol_otnosh={round(volume1 / avg_vol1, 2)}, vol_buy_sell={vol_otnosh1}')
                             position = False
+                            await asyncio.sleep(60)
                         if float(data['k']['c']) >= price_stop:
                             close_sell_order(self.pair, abs(a['amt']))
                             logger.info(
                                 f'stop_loss, {str(datetime.now())[8:19]}, {self.pair}, amplituda= {round(amplituda1, 2)}'
                                 f'avg_ampl= {avg_ampl1},ampl_otnosh={round(amplituda1 / avg_ampl1, 2)} vol_otnosh={round(volume1 / avg_vol1, 2)}, vol_buy_sell={vol_otnosh1}')
                             position = False
+                            await asyncio.sleep(60)
 
 
 if __name__ == '__main__':
