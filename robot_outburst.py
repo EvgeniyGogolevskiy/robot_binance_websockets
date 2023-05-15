@@ -50,7 +50,7 @@ class Strategy:
                         volume = data_volume['list_volume'][-1]
                         vol_otnosh = data_volume['list_volume_diff'][-1]
 
-                    if amplituda > data_klines['average_diff']*5:
+                    if amplituda > data_klines['average_diff']*5 > 0.9:
                         if float(data['k']['o']) > float(data['k']['c'])*1.001:
                             price_buy = float(data['k']['c'])
                             a = buy_order(self.pair, self.dollars_for_order, price_buy)
@@ -121,7 +121,7 @@ if __name__ == '__main__':
     loop = asyncio.get_event_loop()
     try:
         for pair in top_volatily():
-            adp = Strategy(pair, '1m', 30)
+            adp = Strategy(pair, '1m', 40)
             asyncio.ensure_future(adp.main())
         logger.info(f'start {datetime.now()}')
         loop.run_forever()
