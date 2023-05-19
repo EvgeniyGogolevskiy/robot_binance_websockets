@@ -42,6 +42,8 @@ class Strategy:
                     data = json.loads(await client.recv())
                     if data['k']['x']:
                         flag = True
+                        maxprice = float(data['k']['h'])
+                        minprice = float(data['k']['l'])
 
                         """"""" Расчёт волатильности """""""
                         data_klines = calculate_diff(data, data_klines['list_diff'], data_klines['data_high_ma'])
@@ -53,12 +55,12 @@ class Strategy:
                         vol_otnosh = data_volume['list_volume_diff'][-1]
 
                     if amplituda > data_klines['average_diff']*5 > 0.9 and flag:
-                        if float(data['k']['o']) > float(data['k']['c'])*1.001:
+                        if 0.5 < vol_otnosh < 1:
                             price_buy = float(data['k']['c'])
                             a = buy_order(self.pair, self.dollars_for_order, price_buy)
                             if a['position']:
                                 price_take = a['entry_price'] * (1 + amplituda * 0.0025)
-                                price_stop = a['entry_price'] * (1 - amplituda * 0.0025)
+                                price_stop = min(a['entry_price'] * (1 - amplituda * 0.002), minprice)
                                 position = True
                                 side = 'buy'
                                 avg_ampl1 = data_klines['average_diff']
@@ -66,12 +68,12 @@ class Strategy:
                                 amplituda1 = amplituda
                                 volume1 = volume
                                 vol_otnosh1 = vol_otnosh
-                        elif float(data['k']['c']) > float(data['k']['o'])*1.001:
+                        elif 1.4 < vol_otnosh < 3:
                             price_buy = float(data['k']['c'])
                             a = sell_order(self.pair, self.dollars_for_order, price_buy)
                             if a['position']:
                                 price_take = a['entry_price'] * (1 - amplituda * 0.0025)
-                                price_stop = a['entry_price'] * (1 + amplituda * 0.0025)
+                                price_stop = max(a['entry_price'] * (1 + amplituda * 0.002), maxprice)
                                 position = True
                                 side = 'sell'
                                 avg_ampl1 = data_klines['average_diff']
@@ -91,30 +93,30 @@ class Strategy:
                         if float(data['k']['c']) >= price_take:
                             close_buy_order(self.pair, a['amt'])
                             logger.info(
-                                f'take_profit, {str(datetime.now())[8:19]}, {self.pair}, amplituda= {round(amplituda1, 2)}'
-                                f'avg_ampl= {avg_ampl1},ampl_otnosh={round(amplituda1/avg_ampl1, 2)} vol_otnosh={round(volume1/avg_vol1, 2)}, vol_buy_sell={vol_otnosh1}')
+                                f'take_profit {str(datetime.now())[8:19]}, {self.pair}, ampl_otnosh={round(amplituda1 / avg_ampl1, 2)}, '
+                                f'vol_otnosh={round(volume1 / avg_vol1, 2)}, vol_buy_sell={round(vol_otnosh1, 2)}')
                             position = False
                             flag = False
                         if float(data['k']['c']) <= price_stop:
                             close_buy_order(self.pair, a['amt'])
                             logger.info(
-                                f'stop_loss, {str(datetime.now())[8:19]}, {self.pair}, amplituda= {round(amplituda1, 2)}'
-                                f'avg_ampl= {avg_ampl1},ampl_otnosh={round(amplituda1 / avg_ampl1, 2)} vol_otnosh={round(volume1 / avg_vol1, 2)}, vol_buy_sell={vol_otnosh1}')
+                                f'stop_loss {str(datetime.now())[8:19]}, {self.pair}, ampl_otnosh={round(amplituda1 / avg_ampl1, 2)}, '
+                                f'vol_otnosh={round(volume1 / avg_vol1, 2)}, vol_buy_sell={round(vol_otnosh1, 2)}')
                             position = False
                             flag = False
                     if side == 'sell':
                         if float(data['k']['c']) <= price_take:
                             close_sell_order(self.pair, abs(a['amt']))
                             logger.info(
-                                f'take_profit, {str(datetime.now())[8:19]}, {self.pair}, amplituda= {round(amplituda1, 2)}'
-                                f'avg_ampl= {avg_ampl1},ampl_otnosh={round(amplituda1 / avg_ampl1, 2)} vol_otnosh={round(volume1 / avg_vol1, 2)}, vol_buy_sell={vol_otnosh1}')
+                                f'take_profit {str(datetime.now())[8:19]}, {self.pair}, ampl_otnosh={round(amplituda1 / avg_ampl1, 2)}, '
+                                f'vol_otnosh={round(volume1 / avg_vol1, 2)}, vol_buy_sell={round(vol_otnosh1, 2)}')
                             position = False
                             flag = False
                         if float(data['k']['c']) >= price_stop:
                             close_sell_order(self.pair, abs(a['amt']))
                             logger.info(
-                                f'stop_loss, {str(datetime.now())[8:19]}, {self.pair}, amplituda= {round(amplituda1, 2)}'
-                                f'avg_ampl= {avg_ampl1},ampl_otnosh={round(amplituda1 / avg_ampl1, 2)} vol_otnosh={round(volume1 / avg_vol1, 2)}, vol_buy_sell={vol_otnosh1}')
+                                f'stop_loss {str(datetime.now())[8:19]}, {self.pair}, ampl_otnosh={round(amplituda1 / avg_ampl1, 2)}, '
+                                f'vol_otnosh={round(volume1 / avg_vol1, 2)}, vol_buy_sell={round(vol_otnosh1, 2)}')
                             position = False
                             flag = False
 
@@ -123,7 +125,7 @@ if __name__ == '__main__':
     loop = asyncio.get_event_loop()
     try:
         for pair in top_volatily():
-            adp = Strategy(pair, '1m', 30)
+            adp = Strategy(pair, '1m', 50)
             asyncio.ensure_future(adp.main())
         logger.info(f'start {datetime.now()}')
         loop.run_forever()
