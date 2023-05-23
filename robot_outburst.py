@@ -54,8 +54,8 @@ class Strategy:
                         volume = data_volume['list_volume'][-1]
                         vol_otnosh = data_volume['list_volume_diff'][-1]
 
-                    if amplituda > data_klines['average_diff']*6 > 0.9 and (volume / data_volume['average_vol']) > 7 and flag:
-                        if 0.6 < vol_otnosh < 1:
+                    if amplituda > data_klines['average_diff']*6 > 0.9 and flag:
+                        if 0.4 < vol_otnosh < 1:
                             price_buy = float(data['k']['c'])
                             a = buy_order(self.pair, self.dollars_for_order, price_buy)
                             if a['position']:
@@ -64,11 +64,12 @@ class Strategy:
                                 position = True
                                 side = 'buy'
                                 avg_ampl1 = data_klines['average_diff']
+                                avg_ampl15 = data_klines['average_diff5']
                                 avg_vol1 = data_volume['average_vol']
                                 amplituda1 = amplituda
                                 volume1 = volume
                                 vol_otnosh1 = vol_otnosh
-                        elif 1.4 < vol_otnosh < 3:
+                        elif 1.4 < vol_otnosh < 3 and (volume / data_volume['average_vol']) > 7:
                             price_buy = float(data['k']['c'])
                             a = sell_order(self.pair, self.dollars_for_order, price_buy)
                             if a['position']:
@@ -77,6 +78,7 @@ class Strategy:
                                 position = True
                                 side = 'sell'
                                 avg_ampl1 = data_klines['average_diff']
+                                avg_ampl15 = data_klines['average_diff5']
                                 avg_vol1 = data_volume['average_vol']
                                 amplituda1 = amplituda
                                 volume1 = volume
@@ -94,14 +96,14 @@ class Strategy:
                             close_buy_order(self.pair, a['amt'])
                             logger.info(
                                 f'take_profit {str(datetime.now())[8:19]}, {self.pair}, ampl_otnosh={round(amplituda1 / avg_ampl1, 2)}, '
-                                f'vol_otnosh={round(volume1 / avg_vol1, 2)}, vol_buy_sell={round(vol_otnosh1, 2)}')
+                                f'vol_otnosh={round(volume1 / avg_vol1, 2)}, vol_buy_sell={round(vol_otnosh1, 2)}, ao5={round(amplituda1 / avg_ampl15, 2)}')
                             position = False
                             flag = False
                         if float(data['k']['c']) <= price_stop:
                             close_buy_order(self.pair, a['amt'])
                             logger.info(
                                 f'stop_loss {str(datetime.now())[8:19]}, {self.pair}, ampl_otnosh={round(amplituda1 / avg_ampl1, 2)}, '
-                                f'vol_otnosh={round(volume1 / avg_vol1, 2)}, vol_buy_sell={round(vol_otnosh1, 2)}')
+                                f'vol_otnosh={round(volume1 / avg_vol1, 2)}, vol_buy_sell={round(vol_otnosh1, 2)}, ao5={round(amplituda1 / avg_ampl15, 2)}')
                             position = False
                             flag = False
                     if side == 'sell':
@@ -109,14 +111,14 @@ class Strategy:
                             close_sell_order(self.pair, abs(a['amt']))
                             logger.info(
                                 f'take_profit {str(datetime.now())[8:19]}, {self.pair}, ampl_otnosh={round(amplituda1 / avg_ampl1, 2)}, '
-                                f'vol_otnosh={round(volume1 / avg_vol1, 2)}, vol_buy_sell={round(vol_otnosh1, 2)}')
+                                f'vol_otnosh={round(volume1 / avg_vol1, 2)}, vol_buy_sell={round(vol_otnosh1, 2)}, ao5={round(amplituda1 / avg_ampl15, 2)}')
                             position = False
                             flag = False
                         if float(data['k']['c']) >= price_stop:
                             close_sell_order(self.pair, abs(a['amt']))
                             logger.info(
                                 f'stop_loss {str(datetime.now())[8:19]}, {self.pair}, ampl_otnosh={round(amplituda1 / avg_ampl1, 2)}, '
-                                f'vol_otnosh={round(volume1 / avg_vol1, 2)}, vol_buy_sell={round(vol_otnosh1, 2)}')
+                                f'vol_otnosh={round(volume1 / avg_vol1, 2)}, vol_buy_sell={round(vol_otnosh1, 2)}, ao5={round(amplituda1 / avg_ampl15, 2)}')
                             position = False
                             flag = False
 

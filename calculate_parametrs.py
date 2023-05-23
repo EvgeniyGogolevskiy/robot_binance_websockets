@@ -40,7 +40,8 @@ def calculate_diff_first(data_5m):
     for i in range(len(data_5m_high)):
         list_diff.append((float(data_5m_high[i]) - float(data_5m_low[i])) * 100 / float(data_5m_high[i]))
     average_diff = round(statistics.mean(list_diff[:-1]), 2)
-    a = {'list_diff': list_diff, 'average_diff': average_diff, 'data_high_ma': data_high_ma}
+    average_diff5 = round(statistics.mean(list_diff[-6:-1]), 2)
+    a = {'list_diff': list_diff, 'average_diff': average_diff, 'data_high_ma': data_high_ma, 'average_diff5': average_diff5}
     return a
 
 
@@ -49,5 +50,6 @@ def calculate_diff(data, list_diff, data_high_ma):
     data_high_ma = data_high_ma[1:] + [float(data['k']['h'])]
     list_diff = list_diff[1:] + [diff]
     average_diff = round(statistics.mean(list_diff[:-1]), 2)
-    a = {'list_diff': list_diff, 'average_diff': average_diff, 'data_high_ma': data_high_ma}
+    average_diff5 = round(statistics.mean(list_diff[-6:-1]), 2)
+    a = {'list_diff': list_diff, 'average_diff': average_diff, 'data_high_ma': data_high_ma, 'average_diff5': average_diff5}
     return a
