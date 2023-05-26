@@ -54,35 +54,34 @@ class Strategy:
                         volume = data_volume['list_volume'][-1]
                         vol_otnosh = data_volume['list_volume_diff'][-1]
 
-                    if amplituda > data_klines['average_diff']*6 > 0.9 and flag:
-                        if 0.4 < vol_otnosh < 1:
-                            price_buy = float(data['k']['c'])
-                            a = buy_order(self.pair, self.dollars_for_order, price_buy)
-                            if a['position']:
-                                price_take = a['entry_price'] * (1 + amplituda * 0.0025)
-                                price_stop = min(a['entry_price'] * (1 - amplituda * 0.002), minprice)
-                                position = True
-                                side = 'buy'
-                                avg_ampl1 = data_klines['average_diff']
-                                avg_ampl15 = data_klines['average_diff5']
-                                avg_vol1 = data_volume['average_vol']
-                                amplituda1 = amplituda
-                                volume1 = volume
-                                vol_otnosh1 = vol_otnosh
-                        elif 1.4 < vol_otnosh < 3 and (volume / data_volume['average_vol']) > 7:
-                            price_buy = float(data['k']['c'])
-                            a = sell_order(self.pair, self.dollars_for_order, price_buy)
-                            if a['position']:
-                                price_take = a['entry_price'] * (1 - amplituda * 0.0025)
-                                price_stop = max(a['entry_price'] * (1 + amplituda * 0.002), maxprice)
-                                position = True
-                                side = 'sell'
-                                avg_ampl1 = data_klines['average_diff']
-                                avg_ampl15 = data_klines['average_diff5']
-                                avg_vol1 = data_volume['average_vol']
-                                amplituda1 = amplituda
-                                volume1 = volume
-                                vol_otnosh1 = vol_otnosh
+                    if amplituda > data_klines['average_diff5']*4 > 0.9 and (volume / data_volume['average_vol']) < 10 and 0.2 < vol_otnosh < 1 and flag:
+                        price_buy = float(data['k']['c'])
+                        a = buy_order(self.pair, self.dollars_for_order, price_buy)
+                        if a['position']:
+                            price_take = a['entry_price'] * (1 + amplituda * 0.0025)
+                            price_stop = min(a['entry_price'] * (1 - amplituda * 0.002), minprice)
+                            position = True
+                            side = 'buy'
+                            avg_ampl1 = data_klines['average_diff']
+                            avg_ampl15 = data_klines['average_diff5']
+                            avg_vol1 = data_volume['average_vol']
+                            amplituda1 = amplituda
+                            volume1 = volume
+                            vol_otnosh1 = vol_otnosh
+                    elif amplituda > data_klines['average_diff5']*8 > 0.9 and 1.1 < vol_otnosh < 3 and flag:
+                        price_buy = float(data['k']['c'])
+                        a = sell_order(self.pair, self.dollars_for_order, price_buy)
+                        if a['position']:
+                            price_take = a['entry_price'] * (1 - amplituda * 0.0025)
+                            price_stop = max(a['entry_price'] * (1 + amplituda * 0.002), maxprice)
+                            position = True
+                            side = 'sell'
+                            avg_ampl1 = data_klines['average_diff']
+                            avg_ampl15 = data_klines['average_diff5']
+                            avg_vol1 = data_volume['average_vol']
+                            amplituda1 = amplituda
+                            volume1 = volume
+                            vol_otnosh1 = vol_otnosh
                 while position:
                     data = json.loads(await client.recv())
                     if data['k']['x']:
@@ -127,7 +126,7 @@ if __name__ == '__main__':
     loop = asyncio.get_event_loop()
     try:
         for pair in top_volatily():
-            adp = Strategy(pair, '1m', 60)
+            adp = Strategy(pair, '1m', 80)
             asyncio.ensure_future(adp.main())
         logger.info(f'start {datetime.now()}')
         loop.run_forever()
