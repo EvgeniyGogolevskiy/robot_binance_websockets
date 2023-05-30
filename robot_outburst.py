@@ -54,7 +54,7 @@ class Strategy:
                         volume = data_volume['list_volume'][-1]
                         vol_otnosh = data_volume['list_volume_diff'][-1]
 
-                    if amplituda > data_klines['average_diff5']*4 > 0.9 and 8 < (volume / data_volume['average_vol']) < 18 and 0.2 < vol_otnosh < 1 and flag:
+                    if amplituda > data_klines['average_diff5']*4 > 0.9 and 8 < (volume / data_volume['average_vol']) < 18 and 0.4 < vol_otnosh < 0.9 and flag:
                         price_buy = float(data['k']['c'])
                         a = buy_order(self.pair, self.dollars_for_order, price_buy)
                         if a['position']:
