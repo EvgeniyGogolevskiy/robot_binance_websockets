@@ -54,12 +54,12 @@ class Strategy:
                         volume = data_volume['list_volume'][-1]
                         vol_otnosh = data_volume['list_volume_diff'][-1]
 
-                    if amplituda > data_klines['average_diff5']*4 > 0.9 and (volume / data_volume['average_vol']) < 10 and 0.2 < vol_otnosh < 1 and flag:
+                    if amplituda > data_klines['average_diff5']*4 > 0.9 and 8 < (volume / data_volume['average_vol']) < 18 and 0.2 < vol_otnosh < 1 and flag:
                         price_buy = float(data['k']['c'])
                         a = buy_order(self.pair, self.dollars_for_order, price_buy)
                         if a['position']:
                             price_take = a['entry_price'] * (1 + amplituda * 0.0025)
-                            price_stop = min(a['entry_price'] * (1 - amplituda * 0.002), minprice)
+                            price_stop = max(a['entry_price'] * (1 - amplituda * 0.005), minprice, a['entry_price'] * 0.98)
                             position = True
                             side = 'buy'
                             avg_ampl1 = data_klines['average_diff']
@@ -73,7 +73,7 @@ class Strategy:
                         a = sell_order(self.pair, self.dollars_for_order, price_buy)
                         if a['position']:
                             price_take = a['entry_price'] * (1 - amplituda * 0.0025)
-                            price_stop = max(a['entry_price'] * (1 + amplituda * 0.002), maxprice)
+                            price_stop = min(a['entry_price'] * (1 + amplituda * 0.005), maxprice, a['entry_price'] * 0.98)
                             position = True
                             side = 'sell'
                             avg_ampl1 = data_klines['average_diff']

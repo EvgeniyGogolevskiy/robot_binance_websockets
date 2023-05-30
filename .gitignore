@@ -10,4 +10,7 @@ test1_corr.py
 test_log.py
 work_check.py
 test_multiproc.py
-config.py
+lot_size.py
+qwery.py
+test_create_order.py
+testnet_binance.py
