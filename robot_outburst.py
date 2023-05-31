@@ -59,7 +59,7 @@ class Strategy:
                         a = buy_order(self.pair, self.dollars_for_order, price_buy)
                         if a['position']:
                             price_take = a['entry_price'] * (1 + amplituda * 0.0025)
-                            price_stop = max(a['entry_price'] * (1 - amplituda * 0.005), minprice, a['entry_price'] * 0.98)
+                            price_stop = max(a['entry_price'] * (1 - amplituda * 0.005), minprice * (1 - amplituda * 0.002), a['entry_price'] * 0.98)
                             position = True
                             side = 'buy'
                             avg_ampl1 = data_klines['average_diff']
@@ -73,7 +73,7 @@ class Strategy:
                         a = sell_order(self.pair, self.dollars_for_order, price_buy)
                         if a['position']:
                             price_take = a['entry_price'] * (1 - amplituda * 0.0025)
-                            price_stop = min(a['entry_price'] * (1 + amplituda * 0.005), maxprice, a['entry_price'] * 0.98)
+                            price_stop = min(a['entry_price'] * (1 + amplituda * 0.005), maxprice * (1 + amplituda * 0.002), a['entry_price'] * 1.02)
                             position = True
                             side = 'sell'
                             avg_ampl1 = data_klines['average_diff']
