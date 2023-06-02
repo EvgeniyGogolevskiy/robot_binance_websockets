@@ -14,3 +14,4 @@ lot_size.py
 qwery.py
 test_create_order.py
 testnet_binance.py
+config.py
