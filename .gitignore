@@ -15,4 +15,5 @@ qwery.py
 test_create_order.py
 testnet_binance.py
 test_threading_robot.py
+config.py
 
