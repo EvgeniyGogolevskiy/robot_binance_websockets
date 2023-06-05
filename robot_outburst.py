@@ -94,34 +94,34 @@ class Strategy:
                         if float(data['k']['c']) >= price_take:
                             close_buy_order(self.pair, a['amt'])
                             logger.info(
-                                f'take_profit {str(datetime.now())[8:19]}, {self.pair}, avg_ampl={avg_ampl15}, '
+                                f'take_profit {str(datetime.now())[8:19]}, {self.pair}, ampl_otnosh={round(amplituda1 / avg_ampl1, 2)}, '
                                 f'vol_otnosh={round(volume1 / avg_vol1, 2)}, vol_buy_sell={round(vol_otnosh1, 2)}, '
-                                f'ao5={round(amplituda1 / avg_ampl15, 2)}, ampl_otnosh={round(amplituda1 / avg_ampl1, 2)}')
+                                f'ao5={round(amplituda1 / avg_ampl15, 2)}, avg_ampl={avg_ampl15}')
                             position = False
                             flag = False
                         if float(data['k']['c']) <= price_stop:
                             close_buy_order(self.pair, a['amt'])
                             logger.info(
-                                f'stop_loss {str(datetime.now())[8:19]}, {self.pair}, avg_ampl={avg_ampl15}, '
+                                f'stop_loss {str(datetime.now())[8:19]}, {self.pair}, ampl_otnosh={round(amplituda1 / avg_ampl1, 2)}, '
                                 f'vol_otnosh={round(volume1 / avg_vol1, 2)}, vol_buy_sell={round(vol_otnosh1, 2)}, '
-                                f'ao5={round(amplituda1 / avg_ampl15, 2)}, ampl_otnosh={round(amplituda1 / avg_ampl1, 2)}')
+                                f'ao5={round(amplituda1 / avg_ampl15, 2)}, avg_ampl={avg_ampl15}')
                             position = False
                             flag = False
                     if side == 'sell':
                         if float(data['k']['c']) <= price_take:
                             close_sell_order(self.pair, abs(a['amt']))
                             logger.info(
-                                f'take_profit {str(datetime.now())[8:19]}, {self.pair}, avg_ampl={avg_ampl15}, '
+                                f'take_profit {str(datetime.now())[8:19]}, {self.pair}, ampl_otnosh={round(amplituda1 / avg_ampl1, 2)}, '
                                 f'vol_otnosh={round(volume1 / avg_vol1, 2)}, vol_buy_sell={round(vol_otnosh1, 2)}, '
-                                f'ao5={round(amplituda1 / avg_ampl15, 2)}, ampl_otnosh={round(amplituda1 / avg_ampl1, 2)}')
+                                f'ao5={round(amplituda1 / avg_ampl15, 2)}, avg_ampl={avg_ampl15}')
                             position = False
                             flag = False
                         if float(data['k']['c']) >= price_stop:
                             close_sell_order(self.pair, abs(a['amt']))
                             logger.info(
-                                f'stop_loss {str(datetime.now())[8:19]}, {self.pair}, avg_ampl={avg_ampl15}, '
+                                f'stop_loss {str(datetime.now())[8:19]}, {self.pair}, ampl_otnosh={round(amplituda1 / avg_ampl1, 2)}, '
                                 f'vol_otnosh={round(volume1 / avg_vol1, 2)}, vol_buy_sell={round(vol_otnosh1, 2)}, '
-                                f'ao5={round(amplituda1 / avg_ampl15, 2)}, ampl_otnosh={round(amplituda1 / avg_ampl1, 2)}')
+                                f'ao5={round(amplituda1 / avg_ampl15, 2)}, avg_ampl={avg_ampl15}')
                             position = False
                             flag = False
 
