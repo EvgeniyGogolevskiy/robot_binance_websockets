@@ -16,4 +16,3 @@ test_create_order.py
 testnet_binance.py
 test_threading_robot.py
 test_chatgpt.py
-config.py
